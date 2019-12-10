@@ -1,5 +1,6 @@
-module Advent2019.Day1 (
-  solve
+module Advent2019.Day1
+  ( solve
+  , fuelRequirementsForMass
   ) where
 
 import System.IO (hPutStrLn, stderr)
@@ -27,13 +28,19 @@ handleParseError err = do
 requiredFuel :: Int -> Int
 requiredFuel mass = (mass `div` 3) - 2
 
-part1 :: [Int] -> Int
-part1 = sum . map requiredFuel
+fuelRequirementsForMass :: Int -> Int
+fuelRequirementsForMass mass = fuelForMass + if fuelForMass > 0
+                                             then fuelRequirementsForMass fuelForMass
+                                             else 0
+  where
+    fuelForMass = max 0 $ requiredFuel mass
 
 printResults :: [Int] -> IO ()
 printResults xs = do
   let fuelForModules = sum . map requiredFuel $ xs
   putStrLn . show $ fuelForModules
+  let totalFuel = sum . map fuelRequirementsForMass $ xs
+  putStrLn . show $ totalFuel
 
 solve :: IO ()
 solve = do
