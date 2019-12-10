@@ -34,6 +34,4 @@ printResults xs = do
   putStrLn . show $ totalFuel
 
 solve :: IO ()
-solve = do
-  input <- getProblemInputAsByteString 1
-  withSuccessfulParse modules printResults input
+solve = getProblemInputAsByteString 1 >>= withSuccessfulParse modules printResults
