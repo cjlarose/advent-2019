@@ -2,9 +2,30 @@ module Advent2019.Day1 (
   solve
   ) where
 
-import Advent2019.Input (getProblemInputAsString)
+import System.IO (hPutStrLn, stderr)
+import System.Exit (exitFailure)
+
+import Text.Parsec (ParseError, many1, sepEndBy1)
+import qualified Text.Parsec (parse)
+import Text.Parsec.Char (endOfLine, digit)
+import Text.Parsec.ByteString (Parser)
+
+import Advent2019.Input (getProblemInputAsByteString)
+
+moduleMass :: Parser Int
+moduleMass = read <$> many1 digit
+
+modules :: Parser [Int]
+modules = sepEndBy1 moduleMass endOfLine
+
+handleParseError :: ParseError -> IO ()
+handleParseError err = do
+  hPutStrLn stderr "Parse error:"
+  hPutStrLn stderr . show $ err
+  exitFailure
 
 solve :: IO ()
 solve = do
-  inputAsString <- getProblemInputAsString 1
-  putStrLn inputAsString
+  input <- getProblemInputAsByteString 1
+  let parseResult = Text.Parsec.parse modules "" input
+  either handleParseError (putStrLn . show) parseResult
