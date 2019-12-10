@@ -1,9 +1,9 @@
 module Advent2019.Input (
-  getInputAsString
+  getProblemInputAsString
   ) where
 
 path :: Int -> String
 path problemNumber = "inputs/" ++ (show problemNumber) ++ ".txt"
 
-getInputAsString :: Int -> IO String
-getInputAsString = readFile . path
+getProblemInputAsString :: Int -> IO String
+getProblemInputAsString = readFile . path
