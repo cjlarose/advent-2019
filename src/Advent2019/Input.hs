@@ -28,4 +28,4 @@ handleParseError err = do
   exitFailure
 
 withSuccessfulParse :: Parser a -> (a -> IO ()) -> B.ByteString -> IO ()
-withSuccessfulParse p f input = either handleParseError f . Text.Parsec.parse p "" $ input
+withSuccessfulParse p f = either handleParseError f . Text.Parsec.parse p ""
