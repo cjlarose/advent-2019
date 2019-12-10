@@ -30,8 +30,13 @@ requiredFuel mass = (mass `div` 3) - 2
 part1 :: [Int] -> Int
 part1 = sum . map requiredFuel
 
+printResults :: [Int] -> IO ()
+printResults xs = do
+  let fuelForModules = sum . map requiredFuel $ xs
+  putStrLn . show $ fuelForModules
+
 solve :: IO ()
 solve = do
   input <- getProblemInputAsByteString 1
   let parseResult = Text.Parsec.parse modules "" input
-  either handleParseError (putStrLn . show . part1) parseResult
+  either handleParseError printResults parseResult
