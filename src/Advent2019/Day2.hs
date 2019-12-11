@@ -68,9 +68,12 @@ updateMemory updates = do
 runProgram :: [Int] -> [(Int, Int)] -> Int
 runProgram xs updates = evalState (updateMemory updates >> runMachine) (newMachine xs)
 
+runProgramWithInputs :: [Int] -> (Int, Int) -> Int
+runProgramWithInputs xs (a, b) = runProgram xs [(1, a), (2, b)]
+
 printResults :: [Int] -> IO ()
 printResults xs = do
-  let part1 = runProgram xs [(1, 12), (2, 2)]
+  let part1 = runProgramWithInputs xs (12, 2)
   putStrLn . show $ part1
 
 solve :: IO ()
