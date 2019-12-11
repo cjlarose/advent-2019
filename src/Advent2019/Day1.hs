@@ -3,7 +3,7 @@ module Advent2019.Day1
   , fuelRequirementsForMass
   ) where
 
-import Text.Parsec (many1, sepEndBy1)
+import Text.Parsec (many1, sepEndBy1, eof)
 import qualified Text.Parsec (parse)
 import Text.Parsec.Char (endOfLine, digit)
 import Text.Parsec.ByteString (Parser)
@@ -14,7 +14,7 @@ moduleMass :: Parser Int
 moduleMass = read <$> many1 digit
 
 modules :: Parser [Int]
-modules = sepEndBy1 moduleMass endOfLine
+modules = sepEndBy1 moduleMass endOfLine <* eof
 
 requiredFuel :: Int -> Int
 requiredFuel mass = (mass `div` 3) - 2
