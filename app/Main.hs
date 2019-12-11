@@ -4,9 +4,11 @@ import System.Environment (getArgs)
 import System.IO (hPutStrLn, stderr)
 
 import qualified Advent2019.Day1
+import qualified Advent2019.Day2
 
 solver :: Int -> IO ()
 solver 1 = Advent2019.Day1.solve
+solver 2 = Advent2019.Day2.solve
 solver n = hPutStrLn stderr $ "Unknown problem " ++ show n
 
 main :: IO ()
