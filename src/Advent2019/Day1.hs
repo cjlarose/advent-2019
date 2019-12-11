@@ -3,7 +3,7 @@ module Advent2019.Day1
   , fuelRequirementsForMass
   ) where
 
-import Text.Parsec (ParseError, many1, sepEndBy1)
+import Text.Parsec (many1, sepEndBy1)
 import qualified Text.Parsec (parse)
 import Text.Parsec.Char (endOfLine, digit)
 import Text.Parsec.ByteString (Parser)
