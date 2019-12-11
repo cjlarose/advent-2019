@@ -20,8 +20,10 @@ extra-source-files:
 description:         Please see the README on GitHub at <https://github.com/githubuser/advent2019#readme>
 
 dependencies:
+- array
 - base >= 4.7 && < 5
 - bytestring
+- mtl
 - parsec
 
 library:
