@@ -4,7 +4,6 @@ module Advent2019.Day1
   ) where
 
 import Text.Parsec (many1, sepEndBy1, eof)
-import qualified Text.Parsec (parse)
 import Text.Parsec.Char (endOfLine, digit)
 import Text.Parsec.ByteString (Parser)
 
