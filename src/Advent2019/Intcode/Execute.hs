@@ -1,5 +1,8 @@
 module Advent2019.Intcode.Execute
-  ( runProgram
+  ( withMachine
+  , valueAtAddress
+  , writeToAddress
+  , runMachine
   ) where
 
 import Data.Array.IArray (IArray, listArray, (!), (//))
@@ -40,11 +43,11 @@ executeOneInstruction = do
       put (pc + 4, newMemory, Running)
     99 -> put (pc, memory, Terminated)
 
-runMachine :: State Machine Int
+runMachine :: State Machine ()
 runMachine = do
   (_, memory, status) <- get
   case status of
-    Terminated -> return $ memory ! 0
+    Terminated -> return ()
     Running -> executeOneInstruction >> runMachine
 
 updateMemory :: [(Int, Int)] -> State Machine ()
@@ -53,5 +56,13 @@ updateMemory updates = do
   let newMemory = memory // updates
   put (pc, newMemory, status)
 
-runProgram :: [Int] -> [(Int, Int)] -> Int
-runProgram xs updates = evalState (updateMemory updates >> runMachine) (newMachine xs)
+writeToAddress :: Int -> Int -> State Machine ()
+writeToAddress addr val = updateMemory [(addr, val)]
+
+valueAtAddress :: Int -> State Machine Int
+valueAtAddress addr = do
+  (_, memory, _) <- get
+  pure $ memory ! addr
+
+withMachine :: [Int] -> State Machine a -> a
+withMachine program action = evalState action (newMachine program)
