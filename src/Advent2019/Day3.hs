@@ -31,13 +31,13 @@ wireCoords xs = (0, 0) : coords (0, 0) xs
     coords :: (Int, Int) -> WirePath -> [(Int, Int)]
     coords (x, y) [] = []
     coords (x, y) ((dir, displacement):ds) = newCoords ++ coords (last newCoords) ds
-        where
-          newCoords = take displacement [(x1, y1) | t <- [1..], x1 <- [x + dx * t], y1 <- [y + dy * t]]
-          (dx, dy) = case dir of
-                       U -> ( 0,  1)
-                       D -> ( 0, -1)
-                       L -> (-1,  0)
-                       R -> ( 1,  0)
+      where
+        newCoords = take displacement [(x1, y1) | t <- [1..], x1 <- [x + dx * t], y1 <- [y + dy * t]]
+        (dx, dy) = case dir of
+                     U -> ( 0,  1)
+                     D -> ( 0, -1)
+                     L -> (-1,  0)
+                     R -> ( 1,  0)
 
 printResults :: (WirePath, WirePath) -> IO ()
 printResults (p1, p2) = do
