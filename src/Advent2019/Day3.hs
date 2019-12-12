@@ -15,9 +15,9 @@ type WirePath = [Step]
 wirePath :: Parser WirePath
 wirePath = sepBy1 step (char ',')
   where
-    dir :: Char -> Direction -> Parser Direction
-    dir c d = d <$ char c
-    directionSpecification = dir 'U' U <|> dir 'D' D <|> dir 'R' R <|> dir 'L' L
+    dir :: Direction -> Parser Direction
+    dir d = d <$ char (head $ show d)
+    directionSpecification = dir U <|> dir D <|> dir R <|> dir L
     distance = read <$> many1 digit
     step :: Parser Step
     step = (\a b -> (a, b)) <$> directionSpecification <*> distance
