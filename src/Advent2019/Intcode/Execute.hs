@@ -32,15 +32,10 @@ valueAtAddress addr = do
   (_, memory, _) <- get
   pure $ memory ! addr
 
-dereference :: Int -> State Machine Int
-dereference idx = valueAtAddress idx >>= valueAtAddress
-
-executeBinaryOp :: (Int -> Int -> Int) -> State Machine ()
-executeBinaryOp f = do
-  (pc, _, _) <- get
-  operand1 <- dereference $ pc + 1
-  operand2 <- dereference $ pc + 2
-  destAddr <- valueAtAddress $ pc + 3
+executeBinaryOp :: (Int -> Int -> Int) -> [Int] -> State Machine ()
+executeBinaryOp f [a0, a1, destAddr] = do
+  operand1 <- valueAtAddress a0
+  operand2 <- valueAtAddress a1
   let res = operand1 `f` operand2
   writeToAddress destAddr res
 
@@ -54,29 +49,32 @@ halt = do
   (ip, memory, status) <- get
   put (ip, memory, Terminated)
 
-type Instruction = (Int, State Machine ())
+instruction :: Int -> ([Int] -> State Machine a) -> State Machine ()
+instruction numParams effect = do
+  (pc, memory, _) <- get
+  let operands = map (\p -> memory ! (pc + p + 1)) [0..numParams-1]
+  effect operands
+  updateInstructionPointer (+ (numParams + 1))
 
-addInstruction :: Instruction
-addInstruction = (3, executeBinaryOp (+))
+addInstruction :: State Machine ()
+addInstruction = instruction 3 $ executeBinaryOp (+)
 
-multiplyInstruction :: Instruction
-multiplyInstruction = (3, executeBinaryOp (*))
+multiplyInstruction :: State Machine ()
+multiplyInstruction = instruction 3 $ executeBinaryOp (*)
 
-haltInstruction :: Instruction
-haltInstruction = (0, halt)
+haltInstruction :: State Machine ()
+haltInstruction = instruction 0 $ const halt
 
-instructionForOpcode :: Int -> Instruction
-instructionForOpcode 1 = addInstruction
-instructionForOpcode 2 = multiplyInstruction
-instructionForOpcode 99 = haltInstruction
+decodeAndExecute :: Int -> State Machine ()
+decodeAndExecute 1 = addInstruction
+decodeAndExecute 2 = multiplyInstruction
+decodeAndExecute 99 = haltInstruction
 
 executeOneInstruction :: State Machine ()
 executeOneInstruction = do
   (pc, memory, _) <- get
   let opcode = memory ! pc
-  let (numParams, effect) = instructionForOpcode opcode
-  effect
-  updateInstructionPointer (+ (numParams + 1))
+  decodeAndExecute opcode
 
 runMachine :: State Machine ()
 runMachine = do
