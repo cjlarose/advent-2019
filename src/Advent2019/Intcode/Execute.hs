@@ -44,10 +44,10 @@ executeBinaryOp f = do
   let res = operand1 `f` operand2
   writeToAddress destAddr res
 
-setInstructionPointer :: Int -> State Machine ()
-setInstructionPointer ip = do
-  (_, memory, status) <- get
-  put (ip, memory, status)
+updateInstructionPointer :: (Int -> Int) -> State Machine ()
+updateInstructionPointer f = do
+  (pc, memory, status) <- get
+  put (f pc, memory, status)
 
 halt :: State Machine ()
 halt = do
@@ -59,8 +59,8 @@ executeOneInstruction = do
   (pc, memory, _) <- get
   let opcode = memory ! pc
   case opcode of
-    1 -> executeBinaryOp (+) >> setInstructionPointer (pc + 4)
-    2 -> executeBinaryOp (*) >> setInstructionPointer (pc + 4)
+    1 -> executeBinaryOp (+) >> updateInstructionPointer (+ 4)
+    2 -> executeBinaryOp (*) >> updateInstructionPointer (+ 4)
     99 -> halt
 
 runMachine :: State Machine ()
