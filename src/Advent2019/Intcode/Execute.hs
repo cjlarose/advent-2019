@@ -33,9 +33,7 @@ valueAtAddress addr = do
   pure $ memory ! addr
 
 dereference :: Int -> State Machine Int
-dereference idx = do
-  addr <- valueAtAddress idx 
-  valueAtAddress addr
+dereference idx = valueAtAddress idx >>= valueAtAddress
 
 executeBinaryOp :: (Int -> Int -> Int) -> State Machine ()
 executeBinaryOp f = do
@@ -61,12 +59,8 @@ executeOneInstruction = do
   (pc, memory, _) <- get
   let opcode = memory ! pc
   case opcode of
-    1 -> do
-      executeBinaryOp (+)
-      setInstructionPointer $ pc + 4
-    2 -> do
-      executeBinaryOp (*)
-      setInstructionPointer $ pc + 4
+    1 -> executeBinaryOp (+) >> setInstructionPointer (pc + 4)
+    2 -> executeBinaryOp (*) >> setInstructionPointer (pc + 4)
     99 -> halt
 
 runMachine :: State Machine ()
