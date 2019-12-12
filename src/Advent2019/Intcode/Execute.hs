@@ -18,6 +18,20 @@ newMachine xs = (0, arr, Running)
     n = length xs
     arr = listArray (0, n - 1) xs
 
+updateMemory :: [(Int, Int)] -> State Machine ()
+updateMemory updates = do
+  (pc, memory, status) <- get
+  let newMemory = memory // updates
+  put (pc, newMemory, status)
+
+writeToAddress :: Int -> Int -> State Machine ()
+writeToAddress addr val = updateMemory [(addr, val)]
+
+valueAtAddress :: Int -> State Machine Int
+valueAtAddress addr = do
+  (_, memory, _) <- get
+  pure $ memory ! addr
+
 dereference :: UArray Int Int -> Int -> Int
 dereference arr i = arr ! address
   where address = arr ! i
@@ -49,20 +63,6 @@ runMachine = do
   case status of
     Terminated -> return ()
     Running -> executeOneInstruction >> runMachine
-
-updateMemory :: [(Int, Int)] -> State Machine ()
-updateMemory updates = do
-  (pc, memory, status) <- get
-  let newMemory = memory // updates
-  put (pc, newMemory, status)
-
-writeToAddress :: Int -> Int -> State Machine ()
-writeToAddress addr val = updateMemory [(addr, val)]
-
-valueAtAddress :: Int -> State Machine Int
-valueAtAddress addr = do
-  (_, memory, _) <- get
-  pure $ memory ! addr
 
 withMachine :: [Int] -> State Machine a -> a
 withMachine program action = evalState action (newMachine program)
