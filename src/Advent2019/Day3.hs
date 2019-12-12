@@ -2,6 +2,11 @@ module Advent2019.Day3
   ( solve
   ) where
 
+import Data.Set (Set)
+import qualified Data.Set as Set
+import Data.List (minimumBy)
+import Data.Ord (comparing)
+
 import Text.Parsec (many1, sepBy1, eof, (<|>))
 import Text.Parsec.Char (endOfLine, digit, char)
 import Text.Parsec.ByteString (Parser)
@@ -39,11 +44,19 @@ wireCoords xs = (0, 0) : coords (0, 0) xs
                      L -> (-1,  0)
                      R -> ( 1,  0)
 
+intersectingPoints :: WirePath -> WirePath -> Set (Int, Int)
+intersectingPoints p0 p1 = Set.delete (0,0) $ Set.intersection (coords p0) (coords p1)
+  where
+    coords = Set.fromList . wireCoords
+
+oneNorm :: (Int, Int) -> Int
+oneNorm (x, y) = abs x + abs y
+
 printResults :: (WirePath, WirePath) -> IO ()
 printResults (p1, p2) = do
-  putStrLn . show $ p1
-  putStrLn . show $ p2
-  putStrLn . show . wireCoords $ [(R,8),(U,5),(L,5),(D,3)]
+  let intersecting = intersectingPoints p1 p2
+  let closestPoint = minimumBy (comparing oneNorm) . Set.toList $ intersecting
+  putStrLn . show . oneNorm $ closestPoint
 
 solve :: IO ()
 solve = getProblemInputAsByteString 3 >>= withSuccessfulParse wires printResults
