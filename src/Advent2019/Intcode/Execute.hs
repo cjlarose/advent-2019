@@ -32,17 +32,29 @@ valueAtAddress addr = do
   (_, memory, _) <- get
   pure $ memory ! addr
 
-dereference :: UArray Int Int -> Int -> Int
-dereference arr i = arr ! address
-  where address = arr ! i
+dereference :: Int -> State Machine Int
+dereference idx = do
+  addr <- valueAtAddress idx 
+  valueAtAddress addr
 
-executeBinaryOp :: (Int -> Int -> Int) -> UArray Int Int -> Int -> UArray Int Int
-executeBinaryOp f memory pc = memory // [(dest, res)]
-  where
-    operand1 = dereference memory $ pc + 1
-    operand2 = dereference memory $ pc + 2
-    dest = memory ! (pc + 3)
-    res = operand1 `f` operand2
+executeBinaryOp :: (Int -> Int -> Int) -> State Machine ()
+executeBinaryOp f = do
+  (pc, _, _) <- get
+  operand1 <- dereference $ pc + 1
+  operand2 <- dereference $ pc + 2
+  destAddr <- valueAtAddress $ pc + 3
+  let res = operand1 `f` operand2
+  writeToAddress destAddr res
+
+setInstructionPointer :: Int -> State Machine ()
+setInstructionPointer ip = do
+  (_, memory, status) <- get
+  put (ip, memory, status)
+
+halt :: State Machine ()
+halt = do
+  (ip, memory, status) <- get
+  put (ip, memory, Terminated)
 
 executeOneInstruction :: State Machine ()
 executeOneInstruction = do
@@ -50,12 +62,12 @@ executeOneInstruction = do
   let opcode = memory ! pc
   case opcode of
     1 -> do
-      let newMemory = executeBinaryOp (+) memory pc
-      put (pc + 4, newMemory, Running)
+      executeBinaryOp (+)
+      setInstructionPointer $ pc + 4
     2 -> do
-      let newMemory = executeBinaryOp (*) memory pc
-      put (pc + 4, newMemory, Running)
-    99 -> put (pc, memory, Terminated)
+      executeBinaryOp (*)
+      setInstructionPointer $ pc + 4
+    99 -> halt
 
 runMachine :: State Machine ()
 runMachine = do
