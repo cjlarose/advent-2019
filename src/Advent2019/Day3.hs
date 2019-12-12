@@ -45,10 +45,10 @@ wireCoords xs = (0, 0) : coords (0, 0) xs
                      L -> (-1,  0)
                      R -> ( 1,  0)
 
-intersectingPoints :: WirePath -> WirePath -> Set (Int, Int)
+intersectingPoints :: [(Int, Int)] -> [(Int, Int)] -> Set (Int, Int)
 intersectingPoints p0 p1 = Set.delete (0,0) $ Set.intersection (coords p0) (coords p1)
   where
-    coords = Set.fromList . wireCoords
+    coords = Set.fromList
 
 oneNorm :: (Int, Int) -> Int
 oneNorm (x, y) = abs x + abs y
@@ -64,12 +64,14 @@ bestIntersection :: [(Int, Int)] -> [(Int, Int)] -> Set.Set (Int, Int) -> (Int, 
 bestIntersection p0 p1 intersecting = minimumBy (comparing $ combinedSteps p0 p1) intersecting
 
 printResults :: (WirePath, WirePath) -> IO ()
-printResults (p1, p2) = do
-  let intersecting = intersectingPoints p1 p2
+printResults (p0, p1) = do
+  let path0 = wireCoords p0
+  let path1 = wireCoords p1
+  let intersecting = intersectingPoints path0 path1
   let closestPoint = minimumBy (comparing oneNorm) . Set.toList $ intersecting
   putStrLn . show . oneNorm $ closestPoint
-  let best = bestIntersection (wireCoords p1) (wireCoords p2) intersecting
-  putStrLn . show . combinedSteps (wireCoords p1) (wireCoords p2) $ best
+  let best = bestIntersection path0 path1 intersecting
+  putStrLn . show . combinedSteps path0 path1 $ best
 
 solve :: IO ()
 solve = getProblemInputAsByteString 3 >>= withSuccessfulParse wires printResults
