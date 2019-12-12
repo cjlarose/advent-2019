@@ -2,7 +2,7 @@ module Advent2019.Day4
   ( solve
   ) where
 
-import Data.List (find)
+import Data.List (find, group)
 import Data.Maybe (isJust)
 
 import Text.Parsec (many1, eof)
@@ -32,10 +32,15 @@ hasMonotonicallyIncreasingDigits = monotonicallyIncreasing . show
 isCandidate :: Int -> Bool
 isCandidate x = hasMonotonicallyIncreasingDigits x && hasRepeatedDigitPair x
 
+hasRepeatedDigitPairThatIsntPartOfATriple :: Int -> Bool
+hasRepeatedDigitPairThatIsntPartOfATriple x = isJust . find (\g -> length g == 2) . group . show $ x
+
 printResults :: (Int, Int) -> IO ()
 printResults (min, max) = do
-  let numCandidates = length . filter isCandidate $ [min..max]
-  print numCandidates
+  let candidates = filter isCandidate $ [min..max]
+  print . length $ candidates
+  let numPotentialPasswords = length . filter hasRepeatedDigitPairThatIsntPartOfATriple $ candidates
+  print numPotentialPasswords
 
 solve :: IO ()
 solve = getProblemInputAsByteString 4 >>= withSuccessfulParse range printResults
