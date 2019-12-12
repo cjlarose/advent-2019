@@ -4,8 +4,9 @@ module Advent2019.Day3
 
 import Data.Set (Set)
 import qualified Data.Set as Set
-import Data.List (minimumBy)
+import Data.List (minimumBy, elemIndex)
 import Data.Ord (comparing)
+import Data.Maybe (fromJust)
 
 import Text.Parsec (many1, sepBy1, eof, (<|>))
 import Text.Parsec.Char (endOfLine, digit, char)
@@ -52,11 +53,23 @@ intersectingPoints p0 p1 = Set.delete (0,0) $ Set.intersection (coords p0) (coor
 oneNorm :: (Int, Int) -> Int
 oneNorm (x, y) = abs x + abs y
 
+stepsTakenToArriveAtPoint :: (Int, Int) -> [(Int, Int)] -> Int
+stepsTakenToArriveAtPoint dest path = fromJust $ elemIndex dest path
+
+combinedSteps :: [(Int, Int)] -> [(Int, Int)] -> (Int, Int) -> Int
+combinedSteps p0 p1 x = stepsTakenToArriveAtPoint x p0
+                      + stepsTakenToArriveAtPoint x p1
+
+bestIntersection :: [(Int, Int)] -> [(Int, Int)] -> Set.Set (Int, Int) -> (Int, Int)
+bestIntersection p0 p1 intersecting = minimumBy (comparing $ combinedSteps p0 p1) intersecting
+
 printResults :: (WirePath, WirePath) -> IO ()
 printResults (p1, p2) = do
   let intersecting = intersectingPoints p1 p2
   let closestPoint = minimumBy (comparing oneNorm) . Set.toList $ intersecting
   putStrLn . show . oneNorm $ closestPoint
+  let best = bestIntersection (wireCoords p1) (wireCoords p2) intersecting
+  putStrLn . show . combinedSteps (wireCoords p1) (wireCoords p2) $ best
 
 solve :: IO ()
 solve = getProblemInputAsByteString 3 >>= withSuccessfulParse wires printResults
