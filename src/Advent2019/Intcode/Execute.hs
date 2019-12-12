@@ -54,14 +54,29 @@ halt = do
   (ip, memory, status) <- get
   put (ip, memory, Terminated)
 
+type Instruction = (Int, State Machine ())
+
+addInstruction :: Instruction
+addInstruction = (3, executeBinaryOp (+))
+
+multiplyInstruction :: Instruction
+multiplyInstruction = (3, executeBinaryOp (*))
+
+haltInstruction :: Instruction
+haltInstruction = (0, halt)
+
+instructionForOpcode :: Int -> Instruction
+instructionForOpcode 1 = addInstruction
+instructionForOpcode 2 = multiplyInstruction
+instructionForOpcode 99 = haltInstruction
+
 executeOneInstruction :: State Machine ()
 executeOneInstruction = do
   (pc, memory, _) <- get
   let opcode = memory ! pc
-  case opcode of
-    1 -> executeBinaryOp (+) >> updateInstructionPointer (+ 4)
-    2 -> executeBinaryOp (*) >> updateInstructionPointer (+ 4)
-    99 -> halt
+  let (numParams, effect) = instructionForOpcode opcode
+  effect
+  updateInstructionPointer (+ (numParams + 1))
 
 runMachine :: State Machine ()
 runMachine = do
