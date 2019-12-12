@@ -5,10 +5,12 @@ import System.IO (hPutStrLn, stderr)
 
 import qualified Advent2019.Day1
 import qualified Advent2019.Day2
+import qualified Advent2019.Day3
 
 solver :: Int -> IO ()
 solver 1 = Advent2019.Day1.solve
 solver 2 = Advent2019.Day2.solve
+solver 3 = Advent2019.Day3.solve
 solver n = hPutStrLn stderr $ "Unknown problem " ++ show n
 
 main :: IO ()
