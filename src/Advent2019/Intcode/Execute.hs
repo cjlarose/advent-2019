@@ -78,7 +78,7 @@ executeOneInstruction = do
 
 runMachine :: State Machine ()
 runMachine = do
-  (_, memory, status) <- get
+  (_, _, status) <- get
   case status of
     Terminated -> return ()
     Running -> executeOneInstruction >> runMachine
