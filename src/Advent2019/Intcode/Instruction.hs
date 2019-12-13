@@ -52,9 +52,7 @@ multiply = binaryOp (*)
 readInputOp :: [ParameterMode] -> State Machine ()
 readInputOp modes = instruction 1 modes execute
   where
-    execute [Position destAddr] = do
-      val <- readInput
-      writeToAddress destAddr val
+    execute [Position destAddr] = readInput >>= writeToAddress destAddr
 
 halt :: [ParameterMode] -> State Machine ()
 halt _ = instruction 0 [] . const $ do
