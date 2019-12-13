@@ -23,7 +23,7 @@ resolveOperand :: Operand -> State Machine Int
 resolveOperand (Position x) = valueAtAddress x
 resolveOperand (Immediate x) = return x
 
-instruction :: Int -> [ParameterMode] -> ([Operand] -> State Machine a) -> State Machine ()
+instruction :: Int -> [ParameterMode] -> ([Operand] -> State Machine a) -> State Machine a
 instruction numParams modes effect = do
   (pc, _, _, _) <- get
   valuesInOperandPositions <- mapM (\p -> valueAtAddress $ pc + p + 1) [0..numParams-1]
@@ -32,8 +32,7 @@ instruction numParams modes effect = do
                                      ImmediateMode -> Immediate)
                          modes
                          valuesInOperandPositions
-  effect operands
-  updateInstructionPointer (+ (numParams + 1))
+  effect operands <* updateInstructionPointer (+ (numParams + 1))
 
 binaryOp :: (Int -> Int -> Int) -> [ParameterMode] -> State Machine ()
 binaryOp f modes = instruction 3 modes execute
