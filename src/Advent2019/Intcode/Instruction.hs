@@ -1,6 +1,7 @@
 module Advent2019.Intcode.Instruction
   ( add
   , multiply
+  , readInputOp
   , halt
   ) where
 
@@ -12,6 +13,7 @@ import Advent2019.Intcode ( MachineState(..)
                           , Operand(..)
                           , valueAtAddress
                           , writeToAddress
+                          , readInput
                           )
 
 resolveOperand :: Operand -> State Machine Int
@@ -49,6 +51,13 @@ add = binaryOp (+)
 
 multiply :: [ParameterMode] -> State Machine ()
 multiply = binaryOp (*)
+
+readInputOp :: [ParameterMode] -> State Machine ()
+readInputOp modes = instruction 1 modes execute
+  where
+    execute [Position destAddr] = do
+      val <- readInput
+      writeToAddress destAddr val
 
 halt :: [ParameterMode] -> State Machine ()
 halt _ = instruction 0 [] . const $ do

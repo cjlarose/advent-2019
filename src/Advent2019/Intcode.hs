@@ -5,6 +5,7 @@ module Advent2019.Intcode
   , Operand(..)
   , valueAtAddress
   , writeToAddress
+  , readInput
   ) where
 
 import Control.Monad.State (State, get, put)
@@ -30,3 +31,9 @@ valueAtAddress addr = do
   (_, memory, _, _) <- get
   pure $ memory ! addr
 
+readInput :: State Machine Int
+readInput = do
+  (pc, memory, input, status) <- get
+  let val = head input
+  put (pc, memory, tail input, status)
+  pure val

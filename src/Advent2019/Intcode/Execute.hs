@@ -7,7 +7,7 @@ import Data.Array.IArray (listArray)
 import Control.Monad.State (State, get, evalState)
 
 import Advent2019.Intcode (MachineState(..), Machine, valueAtAddress, ParameterMode(..))
-import Advent2019.Intcode.Instruction (add, multiply, halt)
+import Advent2019.Intcode.Instruction (add, multiply, readInputOp, halt)
 
 newMachine :: [Int] -> [Int] -> Machine
 newMachine program input = (0, arr, input, Running)
@@ -29,6 +29,7 @@ executeOneInstruction = do
   let action = case opcode of
                  1 -> add
                  2 -> multiply
+                 3 -> readInputOp
                  99 -> halt
   action paramModes
 
