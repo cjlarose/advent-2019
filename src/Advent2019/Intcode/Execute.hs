@@ -4,9 +4,9 @@ module Advent2019.Intcode.Execute
   ) where
 
 import Data.Array.IArray (listArray)
-import Control.Monad.State (State, get, evalState)
+import Control.Monad.State (get, evalState)
 
-import Advent2019.Intcode (MachineState(..), Machine, ParameterMode(..))
+import Advent2019.Intcode (IntcodeCompute, MachineState(..), Machine, ParameterMode(..))
 import Advent2019.Intcode.Instruction (add, multiply, readInputOp, halt)
 import Advent2019.Intcode.Machine (valueAtAddress)
 
@@ -22,7 +22,7 @@ decodeInstruction inst = (opcode, paramModes ++ repeat PositionMode)
     (rest, opcode) = inst `divMod` 100
     paramModes = reverse . map (toEnum . read . pure) . show $ rest
 
-executeOneInstruction :: State Machine ()
+executeOneInstruction :: IntcodeCompute ()
 executeOneInstruction = do
   (pc, _, _, _) <- get
   inst <- valueAtAddress pc
@@ -34,12 +34,12 @@ executeOneInstruction = do
                  99 -> halt
   action paramModes
 
-runMachine :: State Machine ()
+runMachine :: IntcodeCompute ()
 runMachine = do
   (_, _, _, status) <- get
   case status of
     Terminated -> return ()
     Running -> executeOneInstruction >> runMachine
 
-withMachine :: [Int] -> [Int] -> State Machine a -> a
+withMachine :: [Int] -> [Int] -> IntcodeCompute a -> a
 withMachine program input action = evalState action (newMachine program input)
