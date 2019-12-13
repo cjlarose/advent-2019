@@ -2,6 +2,7 @@ module Advent2019.Intcode.Machine
   ( writeToAddress
   , valueAtAddress
   , readInput
+  , updateInstructionPointer
   ) where
 
 import Control.Monad.State (State, get, put)
@@ -29,3 +30,8 @@ readInput = do
   let val = head input
   put (pc, memory, tail input, status)
   pure val
+
+updateInstructionPointer :: (Int -> Int) -> State Machine ()
+updateInstructionPointer f = do
+  (pc, memory, input, status) <- get
+  put (f pc, memory, input, status)

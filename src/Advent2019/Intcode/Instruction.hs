@@ -15,16 +15,12 @@ import Advent2019.Intcode ( MachineState(..)
 import Advent2019.Intcode.Machine ( valueAtAddress
                                   , writeToAddress
                                   , readInput
+                                  , updateInstructionPointer
                                   )
 
 resolveOperand :: Operand -> State Machine Int
 resolveOperand (Position x) = valueAtAddress x
 resolveOperand (Immediate x) = return x
-
-updateInstructionPointer :: (Int -> Int) -> State Machine ()
-updateInstructionPointer f = do
-  (pc, memory, input, status) <- get
-  put (f pc, memory, input, status)
 
 instruction :: Int -> [ParameterMode] -> ([Operand] -> State Machine a) -> State Machine ()
 instruction numParams modes effect = do
