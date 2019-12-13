@@ -18,13 +18,6 @@ resolveOperand :: Operand -> State Machine Int
 resolveOperand (Position x) = valueAtAddress x
 resolveOperand (Immediate x) = return x
 
-executeBinaryOp :: (Int -> Int -> Int) -> [Operand] -> State Machine ()
-executeBinaryOp f [a1, a2, Position destAddr] = do
-  operand1 <- resolveOperand a1
-  operand2 <- resolveOperand a2
-  let res = operand1 `f` operand2
-  writeToAddress destAddr res
-
 updateInstructionPointer :: (Int -> Int) -> State Machine ()
 updateInstructionPointer f = do
   (pc, memory, status) <- get
@@ -43,7 +36,13 @@ instruction numParams modes effect = do
   updateInstructionPointer (+ (numParams + 1))
 
 binaryOp :: (Int -> Int -> Int) -> [ParameterMode] -> State Machine ()
-binaryOp f modes = instruction 3 modes $ executeBinaryOp f
+binaryOp f modes = instruction 3 modes execute
+  where
+    execute [a1, a2, Position destAddr] = do
+      operand1 <- resolveOperand a1
+      operand2 <- resolveOperand a2
+      let res = operand1 `f` operand2
+      writeToAddress destAddr res
 
 add :: [ParameterMode] -> State Machine ()
 add = binaryOp (+)
