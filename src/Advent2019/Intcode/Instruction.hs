@@ -34,10 +34,13 @@ instruction numParams modes effect = do
                                      ImmediateMode -> Immediate)
                          modes
                          valuesInOperandPositions
-  effect operands <* updateInstructionPointer (+ (numParams + 1))
+  effect operands
+
+nonJumpInstruction :: Int -> [ParameterMode] -> ([Operand] -> IntcodeCompute a) -> IntcodeCompute a
+nonJumpInstruction numParams modes effect = instruction numParams modes effect <* updateInstructionPointer (+ (numParams + 1))
 
 binaryOp :: (Int -> Int -> Int) -> [ParameterMode] -> IntcodeCompute ()
-binaryOp f modes = instruction 3 modes execute
+binaryOp f modes = nonJumpInstruction 3 modes execute
   where
     execute [a1, a2, Position destAddr] =
       liftM2 f (resolveOperand a1) (resolveOperand a2) >>=
@@ -50,12 +53,12 @@ multiply :: [ParameterMode] -> IntcodeCompute ()
 multiply = binaryOp (*)
 
 readInputOp :: [ParameterMode] -> IntcodeCompute ()
-readInputOp modes = instruction 1 modes execute
+readInputOp modes = nonJumpInstruction 1 modes execute
   where
     execute [Position destAddr] = readInput >>= writeToAddress destAddr
 
 writeOutput :: [ParameterMode] -> IntcodeCompute ()
-writeOutput modes = instruction 1 modes execute
+writeOutput modes = nonJumpInstruction 1 modes execute
   where
     execute (operand:[]) = resolveOperand operand >>= tell . pure
 
