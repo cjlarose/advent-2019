@@ -5,6 +5,7 @@ module Advent2019.Intcode.Instruction
   , halt
   ) where
 
+import Control.Monad (liftM2)
 import Control.Monad.State (State, get, put, evalState)
 
 import Advent2019.Intcode ( MachineState(..)
@@ -38,9 +39,7 @@ binaryOp :: (Int -> Int -> Int) -> [ParameterMode] -> State Machine ()
 binaryOp f modes = instruction 3 modes execute
   where
     execute [a1, a2, Position destAddr] = do
-      operand1 <- resolveOperand a1
-      operand2 <- resolveOperand a2
-      let res = operand1 `f` operand2
+      res <- liftM2 f (resolveOperand a1) (resolveOperand a2)
       writeToAddress destAddr res
 
 add :: [ParameterMode] -> State Machine ()
