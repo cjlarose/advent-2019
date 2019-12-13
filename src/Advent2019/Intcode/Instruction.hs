@@ -3,6 +3,10 @@ module Advent2019.Intcode.Instruction
   , multiply
   , readInputOp
   , writeOutput
+  , jumpIfTrue
+  , jumpIfFalse
+  , lessThan
+  , equals
   , halt
   ) where
 
@@ -61,6 +65,32 @@ writeOutput :: [ParameterMode] -> IntcodeCompute ()
 writeOutput modes = nonJumpInstruction 1 modes execute
   where
     execute (operand:[]) = resolveOperand operand >>= tell . pure
+
+jumpIfTrue :: [ParameterMode] -> IntcodeCompute ()
+jumpIfTrue modes = instruction 2 modes execute
+  where
+    execute [a1, a2] = do
+      operand1 <- resolveOperand a1
+      operand2 <- resolveOperand a2
+      if operand1 /= 0
+      then updateInstructionPointer (const operand2)
+      else updateInstructionPointer (+ 3)
+
+jumpIfFalse :: [ParameterMode] -> IntcodeCompute ()
+jumpIfFalse modes = instruction 2 modes execute
+  where
+    execute [a1, a2] = do
+      operand1 <- resolveOperand a1
+      operand2 <- resolveOperand a2
+      if operand1 == 0
+      then updateInstructionPointer (const operand2)
+      else updateInstructionPointer (+ 3)
+
+lessThan :: [ParameterMode] -> IntcodeCompute ()
+lessThan = binaryOp (\a b -> fromEnum $ a < b)
+
+equals :: [ParameterMode] -> IntcodeCompute ()
+equals = binaryOp (\a b -> fromEnum $ a == b)
 
 halt :: [ParameterMode] -> IntcodeCompute ()
 halt _ = instruction 0 [] . const $ do

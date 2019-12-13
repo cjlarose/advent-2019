@@ -15,7 +15,8 @@ printResults xs = (part1, part2)
   where
     airConditionerTestOutput = runMachineWithInput xs [1]
     part1 = show . last $ airConditionerTestOutput
-    part2 = "not yet implemented"
+    (thermalRadiatorControllerTestDianosticCode:[]) = runMachineWithInput xs [5]
+    part2 = show thermalRadiatorControllerTestDianosticCode
 
 solve :: IO (Either String (String, String))
 solve = getProblemInputAsByteString 5 >>= pure . withSuccessfulParse program printResults
