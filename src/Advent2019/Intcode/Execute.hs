@@ -9,11 +9,11 @@ import Control.Monad.State (State, get, evalState)
 import Advent2019.Intcode (MachineState(..), Machine, valueAtAddress, ParameterMode(..))
 import Advent2019.Intcode.Instruction (add, multiply, halt)
 
-newMachine :: [Int] -> Machine
-newMachine xs = (0, arr, Running)
+newMachine :: [Int] -> [Int] -> Machine
+newMachine program input = (0, arr, input, Running)
   where
-    n = length xs
-    arr = listArray (0, n - 1) xs
+    n = length program
+    arr = listArray (0, n - 1) program
 
 decodeInstruction :: Int -> (Int, [ParameterMode])
 decodeInstruction inst = (opcode, paramModes ++ repeat PositionMode)
@@ -23,7 +23,7 @@ decodeInstruction inst = (opcode, paramModes ++ repeat PositionMode)
 
 executeOneInstruction :: State Machine ()
 executeOneInstruction = do
-  (pc, _, _) <- get
+  (pc, _, _, _) <- get
   inst <- valueAtAddress pc
   let (opcode, paramModes) = decodeInstruction inst
   let action = case opcode of
@@ -34,10 +34,10 @@ executeOneInstruction = do
 
 runMachine :: State Machine ()
 runMachine = do
-  (_, _, status) <- get
+  (_, _, _, status) <- get
   case status of
     Terminated -> return ()
     Running -> executeOneInstruction >> runMachine
 
-withMachine :: [Int] -> State Machine a -> a
-withMachine program action = evalState action (newMachine program)
+withMachine :: [Int] -> [Int] -> State Machine a -> a
+withMachine program input action = evalState action (newMachine program input)

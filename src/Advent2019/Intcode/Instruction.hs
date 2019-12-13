@@ -20,12 +20,12 @@ resolveOperand (Immediate x) = return x
 
 updateInstructionPointer :: (Int -> Int) -> State Machine ()
 updateInstructionPointer f = do
-  (pc, memory, status) <- get
-  put (f pc, memory, status)
+  (pc, memory, input, status) <- get
+  put (f pc, memory, input, status)
 
 instruction :: Int -> [ParameterMode] -> ([Operand] -> State Machine a) -> State Machine ()
 instruction numParams modes effect = do
-  (pc, _, _) <- get
+  (pc, _, _, _) <- get
   valuesInOperandPositions <- mapM (\p -> valueAtAddress $ pc + p + 1) [0..numParams-1]
   let operands = zipWith (\mode -> case mode of
                                      PositionMode -> Position
@@ -52,5 +52,5 @@ multiply = binaryOp (*)
 
 halt :: [ParameterMode] -> State Machine ()
 halt _ = instruction 0 [] . const $ do
-  (ip, memory, status) <- get
-  put (ip, memory, Terminated)
+  (ip, memory, input, status) <- get
+  put (ip, memory, input ,Terminated)
