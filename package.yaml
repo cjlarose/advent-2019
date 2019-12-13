@@ -52,3 +52,6 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - advent2019
+    - filepath
+    - tasty
+    - tasty-golden
