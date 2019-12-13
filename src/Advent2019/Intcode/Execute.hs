@@ -4,7 +4,8 @@ module Advent2019.Intcode.Execute
   ) where
 
 import Data.Array.IArray (listArray)
-import Control.Monad.State (get, evalState)
+import Control.Monad.State (get)
+import Control.Monad.RWS (evalRWS)
 
 import Advent2019.Intcode (IntcodeCompute, MachineState(..), Machine, ParameterMode(..))
 import Advent2019.Intcode.Instruction (add, multiply, readInputOp, halt)
@@ -41,5 +42,5 @@ runMachine = do
     Terminated -> return ()
     Running -> executeOneInstruction >> runMachine
 
-withMachine :: [Int] -> [Int] -> IntcodeCompute a -> a
-withMachine program input action = evalState action (newMachine program input)
+withMachine :: [Int] -> [Int] -> IntcodeCompute a -> (a, [Int])
+withMachine program input action = evalRWS action () (newMachine program input)

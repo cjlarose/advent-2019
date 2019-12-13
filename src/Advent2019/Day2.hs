@@ -11,7 +11,7 @@ import Advent2019.Intcode.Parse (program)
 import Advent2019.Intcode.Execute (withMachine, runMachine)
 
 runProgramWithInputs :: [Int] -> (Int, Int) -> Int
-runProgramWithInputs xs (a, b) = withMachine xs [] $ do
+runProgramWithInputs xs (a, b) = fst . withMachine xs [] $ do
   writeToAddress 1 a
   writeToAddress 2 b
   runMachine
