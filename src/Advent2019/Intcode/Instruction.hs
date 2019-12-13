@@ -30,11 +30,6 @@ updateInstructionPointer f = do
   (pc, memory, status) <- get
   put (f pc, memory, status)
 
-halt :: State Machine ()
-halt = do
-  (ip, memory, status) <- get
-  put (ip, memory, Terminated)
-
 instruction :: Int -> [ParameterMode] -> ([Operand] -> State Machine a) -> State Machine ()
 instruction numParams modes effect = do
   (pc, _, _) <- get
@@ -54,4 +49,6 @@ multiplyInstruction :: [ParameterMode] -> State Machine ()
 multiplyInstruction modes = instruction 3 modes $ executeBinaryOp (*)
 
 haltInstruction :: [ParameterMode] -> State Machine ()
-haltInstruction _ = instruction 0 [] $ const halt
+haltInstruction _ = instruction 0 [] . const $ do
+  (ip, memory, status) <- get
+  put (ip, memory, Terminated)
