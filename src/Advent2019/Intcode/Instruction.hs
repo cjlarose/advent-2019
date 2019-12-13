@@ -42,11 +42,14 @@ instruction numParams modes effect = do
   effect operands
   updateInstructionPointer (+ (numParams + 1))
 
+binaryOp :: (Int -> Int -> Int) -> [ParameterMode] -> State Machine ()
+binaryOp f modes = instruction 3 modes $ executeBinaryOp f
+
 add :: [ParameterMode] -> State Machine ()
-add modes = instruction 3 modes $ executeBinaryOp (+)
+add = binaryOp (+)
 
 multiply :: [ParameterMode] -> State Machine ()
-multiply modes = instruction 3 modes $ executeBinaryOp (*)
+multiply = binaryOp (*)
 
 halt :: [ParameterMode] -> State Machine ()
 halt _ = instruction 0 [] . const $ do
