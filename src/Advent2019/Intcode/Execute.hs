@@ -95,8 +95,8 @@ decodeAndExecute inst = action paramModes
 executeOneInstruction :: State Machine ()
 executeOneInstruction = do
   (pc, memory, _) <- get
-  let opcode = memory ! pc
-  decodeAndExecute opcode
+  let inst = memory ! pc
+  decodeAndExecute inst
 
 runMachine :: State Machine ()
 runMachine = do
