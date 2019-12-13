@@ -6,7 +6,7 @@ module Advent2019.Intcode.Instruction
   ) where
 
 import Control.Monad (liftM2)
-import Control.Monad.State (State, get, put, evalState)
+import Control.Monad.State (get, put)
 
 import Advent2019.Intcode ( MachineState(..)
                           , IntcodeCompute

@@ -5,7 +5,7 @@ module Advent2019.Intcode.Machine
   , updateInstructionPointer
   ) where
 
-import Control.Monad.State (State, get, put)
+import Control.Monad.State (get, put)
 import Data.Array.Unboxed ((//), (!))
 
 import Advent2019.Intcode (IntcodeCompute)
