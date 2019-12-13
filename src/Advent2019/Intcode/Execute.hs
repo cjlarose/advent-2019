@@ -83,20 +83,16 @@ decodeInstruction inst = (opcode, paramModes ++ repeat PositionMode)
     (rest, opcode) = inst `divMod` 100
     paramModes = reverse . map (toEnum . read . pure) . show $ rest
 
-decodeAndExecute :: Int -> State Machine ()
-decodeAndExecute inst = action paramModes
-  where
-    (opcode, paramModes) = decodeInstruction inst
-    action = case opcode of
-               1 -> addInstruction
-               2 -> multiplyInstruction
-               99 -> haltInstruction
-
 executeOneInstruction :: State Machine ()
 executeOneInstruction = do
   (pc, memory, _) <- get
   let inst = memory ! pc
-  decodeAndExecute inst
+  let (opcode, paramModes) = decodeInstruction inst
+  let action = case opcode of
+                 1 -> addInstruction
+                 2 -> multiplyInstruction
+                 99 -> haltInstruction
+  action paramModes
 
 runMachine :: State Machine ()
 runMachine = do
