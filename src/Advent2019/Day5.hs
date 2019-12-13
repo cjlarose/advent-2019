@@ -13,8 +13,8 @@ runMachineWithInput xs input = snd $ withMachine xs input runMachine
 printResults :: [Int] -> (String, String)
 printResults xs = (part1, part2)
   where
-    output = runMachineWithInput xs [1]
-    part1 = show . last $ output
+    airConditionerTestOutput = runMachineWithInput xs [1]
+    part1 = show . last $ airConditionerTestOutput
     part2 = "not yet implemented"
 
 solve :: IO (Either String (String, String))
