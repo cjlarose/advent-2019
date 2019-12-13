@@ -12,6 +12,9 @@ import Control.Monad.State (State, get, put, evalState)
 data MachineState = Running | Terminated
 type Machine = (Int, UArray Int Int, MachineState)
 
+data ParameterMode = PositionMode | ImmediateMode deriving (Enum)
+data Operand = Position Int | Immediate Int
+
 newMachine :: [Int] -> Machine
 newMachine xs = (0, arr, Running)
   where
@@ -32,10 +35,14 @@ valueAtAddress addr = do
   (_, memory, _) <- get
   pure $ memory ! addr
 
-executeBinaryOp :: (Int -> Int -> Int) -> [Int] -> State Machine ()
-executeBinaryOp f [a0, a1, destAddr] = do
-  operand1 <- valueAtAddress a0
-  operand2 <- valueAtAddress a1
+executeBinaryOp :: (Int -> Int -> Int) -> [Operand] -> State Machine ()
+executeBinaryOp f [a1, a2, Position destAddr] = do
+  operand1 <- case a1 of
+                Position x -> valueAtAddress x
+                Immediate x -> return x
+  operand2 <- case a2 of
+                Position x -> valueAtAddress x
+                Immediate x -> return x
   let res = operand1 `f` operand2
   writeToAddress destAddr res
 
@@ -49,26 +56,41 @@ halt = do
   (ip, memory, status) <- get
   put (ip, memory, Terminated)
 
-instruction :: Int -> ([Int] -> State Machine a) -> State Machine ()
-instruction numParams effect = do
+instruction :: Int -> [ParameterMode] -> ([Operand] -> State Machine a) -> State Machine ()
+instruction numParams modes effect = do
   (pc, memory, _) <- get
-  let operands = map (\p -> memory ! (pc + p + 1)) [0..numParams-1]
+  let valuesInOperandPositions = map (\p -> memory ! (pc + p + 1)) [0..numParams-1]
+  let operands = zipWith (\value mode -> case mode of
+                                           PositionMode -> Position value
+                                           ImmediateMode -> Immediate value)
+                         valuesInOperandPositions
+                         modes
   effect operands
   updateInstructionPointer (+ (numParams + 1))
 
-addInstruction :: State Machine ()
-addInstruction = instruction 3 $ executeBinaryOp (+)
+addInstruction :: [ParameterMode] -> State Machine ()
+addInstruction modes = instruction 3 modes $ executeBinaryOp (+)
 
-multiplyInstruction :: State Machine ()
-multiplyInstruction = instruction 3 $ executeBinaryOp (*)
+multiplyInstruction :: [ParameterMode] -> State Machine ()
+multiplyInstruction modes = instruction 3 modes $ executeBinaryOp (*)
 
-haltInstruction :: State Machine ()
-haltInstruction = instruction 0 $ const halt
+haltInstruction :: [ParameterMode] -> State Machine ()
+haltInstruction _ = instruction 0 [] $ const halt
+
+decodeInstruction :: Int -> (Int, [ParameterMode])
+decodeInstruction inst = (opcode, paramModes ++ repeat PositionMode)
+  where
+    (rest, opcode) = inst `divMod` 100
+    paramModes = reverse . map (toEnum . read . pure) . show $ rest
 
 decodeAndExecute :: Int -> State Machine ()
-decodeAndExecute 1 = addInstruction
-decodeAndExecute 2 = multiplyInstruction
-decodeAndExecute 99 = haltInstruction
+decodeAndExecute inst = action paramModes
+  where
+    (opcode, paramModes) = decodeInstruction inst
+    action = case opcode of
+               1 -> addInstruction
+               2 -> multiplyInstruction
+               99 -> haltInstruction
 
 executeOneInstruction :: State Machine ()
 executeOneInstruction = do
