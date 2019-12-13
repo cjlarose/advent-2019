@@ -60,11 +60,11 @@ instruction :: Int -> [ParameterMode] -> ([Operand] -> State Machine a) -> State
 instruction numParams modes effect = do
   (pc, memory, _) <- get
   let valuesInOperandPositions = map (\p -> memory ! (pc + p + 1)) [0..numParams-1]
-  let operands = zipWith (\value mode -> case mode of
-                                           PositionMode -> Position value
-                                           ImmediateMode -> Immediate value)
-                         valuesInOperandPositions
+  let operands = zipWith (\mode -> case mode of
+                                     PositionMode -> Position
+                                     ImmediateMode -> Immediate)
                          modes
+                         valuesInOperandPositions
   effect operands
   updateInstructionPointer (+ (numParams + 1))
 
