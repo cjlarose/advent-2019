@@ -35,14 +35,14 @@ valueAtAddress addr = do
   (_, memory, _) <- get
   pure $ memory ! addr
 
+resolveOperand :: Operand -> State Machine Int
+resolveOperand (Position x) = valueAtAddress x
+resolveOperand (Immediate x) = return x
+
 executeBinaryOp :: (Int -> Int -> Int) -> [Operand] -> State Machine ()
 executeBinaryOp f [a1, a2, Position destAddr] = do
-  operand1 <- case a1 of
-                Position x -> valueAtAddress x
-                Immediate x -> return x
-  operand2 <- case a2 of
-                Position x -> valueAtAddress x
-                Immediate x -> return x
+  operand1 <- resolveOperand a1
+  operand2 <- resolveOperand a2
   let res = operand1 `f` operand2
   writeToAddress destAddr res
 
