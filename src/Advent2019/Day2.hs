@@ -6,7 +6,7 @@ import Data.List (find)
 import Data.Maybe (fromJust)
 
 import Advent2019.Input (getProblemInputAsByteString, withSuccessfulParse)
-import Advent2019.Intcode (writeToAddress, valueAtAddress)
+import Advent2019.Intcode.Machine (writeToAddress, valueAtAddress)
 import Advent2019.Intcode.Parse (program)
 import Advent2019.Intcode.Execute (withMachine, runMachine)
 

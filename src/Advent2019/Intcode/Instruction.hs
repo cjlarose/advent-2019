@@ -11,10 +11,11 @@ import Advent2019.Intcode ( MachineState(..)
                           , Machine
                           , ParameterMode(..)
                           , Operand(..)
-                          , valueAtAddress
-                          , writeToAddress
-                          , readInput
                           )
+import Advent2019.Intcode.Machine ( valueAtAddress
+                                  , writeToAddress
+                                  , readInput
+                                  )
 
 resolveOperand :: Operand -> State Machine Int
 resolveOperand (Position x) = valueAtAddress x

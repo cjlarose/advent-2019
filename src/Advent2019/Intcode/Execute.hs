@@ -6,8 +6,9 @@ module Advent2019.Intcode.Execute
 import Data.Array.IArray (listArray)
 import Control.Monad.State (State, get, evalState)
 
-import Advent2019.Intcode (MachineState(..), Machine, valueAtAddress, ParameterMode(..))
+import Advent2019.Intcode (MachineState(..), Machine, ParameterMode(..))
 import Advent2019.Intcode.Instruction (add, multiply, readInputOp, halt)
+import Advent2019.Intcode.Machine (valueAtAddress)
 
 newMachine :: [Int] -> [Int] -> Machine
 newMachine program input = (0, arr, input, Running)
