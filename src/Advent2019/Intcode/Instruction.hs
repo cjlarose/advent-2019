@@ -38,9 +38,9 @@ instruction numParams modes effect = do
 binaryOp :: (Int -> Int -> Int) -> [ParameterMode] -> State Machine ()
 binaryOp f modes = instruction 3 modes execute
   where
-    execute [a1, a2, Position destAddr] = do
-      res <- liftM2 f (resolveOperand a1) (resolveOperand a2)
-      writeToAddress destAddr res
+    execute [a1, a2, Position destAddr] =
+      liftM2 f (resolveOperand a1) (resolveOperand a2) >>=
+        writeToAddress destAddr
 
 add :: [ParameterMode] -> State Machine ()
 add = binaryOp (+)
