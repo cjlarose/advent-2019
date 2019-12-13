@@ -7,7 +7,7 @@ import Data.Array.IArray (listArray)
 import Control.Monad.State (State, get, evalState)
 
 import Advent2019.Intcode (MachineState(..), Machine, valueAtAddress, ParameterMode(..))
-import Advent2019.Intcode.Instruction (addInstruction, multiplyInstruction, haltInstruction)
+import Advent2019.Intcode.Instruction (add, multiply, halt)
 
 newMachine :: [Int] -> Machine
 newMachine xs = (0, arr, Running)
@@ -27,9 +27,9 @@ executeOneInstruction = do
   inst <- valueAtAddress pc
   let (opcode, paramModes) = decodeInstruction inst
   let action = case opcode of
-                 1 -> addInstruction
-                 2 -> multiplyInstruction
-                 99 -> haltInstruction
+                 1 -> add
+                 2 -> multiply
+                 99 -> halt
   action paramModes
 
 runMachine :: State Machine ()

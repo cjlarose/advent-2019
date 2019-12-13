@@ -1,7 +1,7 @@
 module Advent2019.Intcode.Instruction
-  ( addInstruction
-  , multiplyInstruction
-  , haltInstruction
+  ( add
+  , multiply
+  , halt
   ) where
 
 import Control.Monad.State (State, get, put, evalState)
@@ -42,13 +42,13 @@ instruction numParams modes effect = do
   effect operands
   updateInstructionPointer (+ (numParams + 1))
 
-addInstruction :: [ParameterMode] -> State Machine ()
-addInstruction modes = instruction 3 modes $ executeBinaryOp (+)
+add :: [ParameterMode] -> State Machine ()
+add modes = instruction 3 modes $ executeBinaryOp (+)
 
-multiplyInstruction :: [ParameterMode] -> State Machine ()
-multiplyInstruction modes = instruction 3 modes $ executeBinaryOp (*)
+multiply :: [ParameterMode] -> State Machine ()
+multiply modes = instruction 3 modes $ executeBinaryOp (*)
 
-haltInstruction :: [ParameterMode] -> State Machine ()
-haltInstruction _ = instruction 0 [] . const $ do
+halt :: [ParameterMode] -> State Machine ()
+halt _ = instruction 0 [] . const $ do
   (ip, memory, status) <- get
   put (ip, memory, Terminated)
