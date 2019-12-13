@@ -25,12 +25,13 @@ fuelRequirementsForMass mass = fuelForMass + if fuelForMass > 0
   where
     fuelForMass = max 0 $ requiredFuel mass
 
-printResults :: [Int] -> IO ()
-printResults xs = do
-  let fuelForModules = sum . map requiredFuel $ xs
-  putStrLn . show $ fuelForModules
-  let totalFuel = sum . map fuelRequirementsForMass $ xs
-  putStrLn . show $ totalFuel
+printResults :: [Int] -> (String, String)
+printResults xs = (part1, part2)
+  where
+    fuelForModules = sum . map requiredFuel $ xs
+    part1 = show fuelForModules
+    totalFuel = sum . map fuelRequirementsForMass $ xs
+    part2 = show totalFuel
 
-solve :: IO ()
-solve = getProblemInputAsByteString 1 >>= withSuccessfulParse modules printResults
+solve :: IO (Either String (String, String))
+solve = getProblemInputAsByteString 1 >>= pure . withSuccessfulParse modules printResults

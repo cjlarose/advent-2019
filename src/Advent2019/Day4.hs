@@ -35,12 +35,13 @@ isCandidate x = hasMonotonicallyIncreasingDigits x && hasRepeatedDigitPair x
 hasRepeatedDigitPairThatIsntPartOfATriple :: Int -> Bool
 hasRepeatedDigitPairThatIsntPartOfATriple x = isJust . find (\g -> length g == 2) . group . show $ x
 
-printResults :: (Int, Int) -> IO ()
-printResults (min, max) = do
-  let candidates = filter isCandidate $ [min..max]
-  print . length $ candidates
-  let numPotentialPasswords = length . filter hasRepeatedDigitPairThatIsntPartOfATriple $ candidates
-  print numPotentialPasswords
+printResults :: (Int, Int) -> (String, String)
+printResults (min, max) = (part1, part2)
+  where
+    candidates = filter isCandidate $ [min..max]
+    part1 = show . length $ candidates
+    numPotentialPasswords = length . filter hasRepeatedDigitPairThatIsntPartOfATriple $ candidates
+    part2 = show $ numPotentialPasswords
 
-solve :: IO ()
-solve = getProblemInputAsByteString 4 >>= withSuccessfulParse range printResults
+solve :: IO (Either String (String, String))
+solve = getProblemInputAsByteString 4 >>= pure . withSuccessfulParse range printResults

@@ -27,5 +27,8 @@ handleParseError err = do
   hPutStrLn stderr . show $ err
   exitFailure
 
-withSuccessfulParse :: Parser a -> (a -> IO ()) -> B.ByteString -> IO ()
-withSuccessfulParse p f = either handleParseError f . Text.Parsec.parse p ""
+withSuccessfulParse :: Parser a -> (a -> (String, String)) -> B.ByteString -> Either String (String, String)
+withSuccessfulParse p f x = let res = Text.Parsec.parse p "" x
+  in case res of
+       Left err -> Left $ show err
+       Right parsed -> Right . f $ parsed

@@ -63,15 +63,16 @@ combinedSteps p0 p1 x = stepsTakenToArriveAtPoint x p0
 bestIntersection :: [(Int, Int)] -> [(Int, Int)] -> Set.Set (Int, Int) -> (Int, Int)
 bestIntersection p0 p1 intersecting = minimumBy (comparing $ combinedSteps p0 p1) intersecting
 
-printResults :: (WirePath, WirePath) -> IO ()
-printResults (p0, p1) = do
-  let path0 = wireCoords p0
-  let path1 = wireCoords p1
-  let intersecting = intersectingPoints path0 path1
-  let closestPoint = minimumBy (comparing oneNorm) . Set.toList $ intersecting
-  putStrLn . show . oneNorm $ closestPoint
-  let best = bestIntersection path0 path1 intersecting
-  putStrLn . show . combinedSteps path0 path1 $ best
+printResults :: (WirePath, WirePath) -> (String, String)
+printResults (p0, p1) = (part1, part2)
+  where
+    path0 = wireCoords p0
+    path1 = wireCoords p1
+    intersecting = intersectingPoints path0 path1
+    closestPoint = minimumBy (comparing oneNorm) . Set.toList $ intersecting
+    part1 = show . oneNorm $ closestPoint
+    best = bestIntersection path0 path1 intersecting
+    part2 = show . combinedSteps path0 path1 $ best
 
-solve :: IO ()
-solve = getProblemInputAsByteString 3 >>= withSuccessfulParse wires printResults
+solve :: IO (Either String (String, String))
+solve = getProblemInputAsByteString 3 >>= pure . withSuccessfulParse wires printResults

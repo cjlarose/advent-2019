@@ -20,12 +20,12 @@ runProgramWithInputs xs (a, b) = fst . withMachine xs [] $ do
 findNounVerb :: [Int] -> Int -> (Int, Int)
 findNounVerb xs n = fst . fromJust . find ((== n) . snd) . map (\p -> (p, runProgramWithInputs xs p)) $ [(a, b) | a <- [0..99], b <- [0..99]]
 
-printResults :: [Int] -> IO ()
-printResults xs = do
-  let part1 = runProgramWithInputs xs (12, 2)
-  let (noun, verb) = findNounVerb xs 19690720
-  putStrLn . show $ part1
-  putStrLn . show $ 100 * noun + verb
+printResults :: [Int] -> (String, String)
+printResults xs = (part1, part2)
+  where
+    part1 = show $ runProgramWithInputs xs (12, 2)
+    (noun, verb) = findNounVerb xs 19690720
+    part2 = show $ 100 * noun + verb
 
-solve :: IO ()
-solve = getProblemInputAsByteString 2 >>= withSuccessfulParse program printResults
+solve :: IO (Either String (String, String))
+solve = getProblemInputAsByteString 2 >>= pure . withSuccessfulParse program printResults
