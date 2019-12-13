@@ -8,7 +8,7 @@ import Control.Monad.State (get)
 import Control.Monad.RWS (evalRWS)
 
 import Advent2019.Intcode (IntcodeCompute, MachineState(..), Machine, ParameterMode(..))
-import Advent2019.Intcode.Instruction (add, multiply, readInputOp, halt)
+import Advent2019.Intcode.Instruction (add, multiply, readInputOp, writeOutput, halt)
 import Advent2019.Intcode.Machine (valueAtAddress)
 
 newMachine :: [Int] -> [Int] -> Machine
@@ -32,6 +32,7 @@ executeOneInstruction = do
                  1 -> add
                  2 -> multiply
                  3 -> readInputOp
+                 4 -> writeOutput
                  99 -> halt
   action paramModes
 

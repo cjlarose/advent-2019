@@ -2,11 +2,13 @@ module Advent2019.Intcode.Instruction
   ( add
   , multiply
   , readInputOp
+  , writeOutput
   , halt
   ) where
 
 import Control.Monad (liftM2)
 import Control.Monad.State (get, put)
+import Control.Monad.Writer (tell)
 
 import Advent2019.Intcode ( MachineState(..)
                           , IntcodeCompute
@@ -51,6 +53,11 @@ readInputOp :: [ParameterMode] -> IntcodeCompute ()
 readInputOp modes = instruction 1 modes execute
   where
     execute [Position destAddr] = readInput >>= writeToAddress destAddr
+
+writeOutput :: [ParameterMode] -> IntcodeCompute ()
+writeOutput modes = instruction 1 modes execute
+  where
+    execute (operand:[]) = resolveOperand operand >>= tell . pure
 
 halt :: [ParameterMode] -> IntcodeCompute ()
 halt _ = instruction 0 [] . const $ do
