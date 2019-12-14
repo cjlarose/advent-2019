@@ -17,6 +17,7 @@ import Advent2019.Input (getProblemInputAsByteString, withSuccessfulParse)
 data Reaction = Reaction { reactants :: [(Int, String)]
                          , productR :: (Int, String)
                          } deriving Show
+type ReactionMap = Map.Map String Reaction
 
 reactions :: Parser [Reaction]
 reactions = sepEndBy1 reaction endOfLine <* eof
@@ -25,17 +26,20 @@ reactions = sepEndBy1 reaction endOfLine <* eof
     lhs = sepBy1 quantityChemical (char ',' >> many1 space)
     reaction = Reaction <$> (lhs <* many1 space <* char '=' <* char '>' <* many1 space) <*> quantityChemical
 
-productionRule :: [Reaction] -> String -> Reaction
-productionRule rs chem = fromJust . find ((== chem) . snd . productR) $ rs
+indexByProduct :: [Reaction] -> ReactionMap
+indexByProduct = Map.fromList . map (\reaction -> (snd . productR $ reaction, reaction))
 
-reactionChainDepth :: [Reaction] -> String -> Int
+productionRule :: ReactionMap -> String -> Reaction
+productionRule rs chem = rs ! chem
+
+reactionChainDepth :: ReactionMap -> String -> Int
 reactionChainDepth rs chem | chem == "ORE" = 0
                            | otherwise = (maximum . map (reactionChainDepth rs . snd) . reactants . productionRule rs $ chem) + 1
 
 mergeDeps :: Map.Map String Int -> Map.Map String Int -> Map.Map String Int
 mergeDeps = Map.unionWith (+)
 
-breakDownOneStep :: [Reaction] -> (Int, String) -> [(Int, String)]
+breakDownOneStep :: ReactionMap -> (Int, String) -> [(Int, String)]
 breakDownOneStep rs (req, chem) = map (\(k, d) -> (k * multiplier, d)) deps
   where
     rule = productionRule rs chem
@@ -43,7 +47,7 @@ breakDownOneStep rs (req, chem) = map (\(k, d) -> (k * multiplier, d)) deps
     yield = fst . productR $ rule
     multiplier = ceiling $ fromIntegral req / fromIntegral yield
 
-requiredOre :: [Reaction] -> Map.Map String Int -> Int
+requiredOre :: ReactionMap -> Map.Map String Int -> Int
 requiredOre rs deps
   | Map.size deps == 1 && "ORE" `Map.member` deps = deps ! "ORE"
   | otherwise = requiredOre rs $ mergeDeps depsWithoutLongest newDeps
@@ -58,7 +62,8 @@ toDepMap = foldr (uncurry Map.insert . swap) Map.empty
 printResults :: [Reaction] -> (String, String)
 printResults xs = (part1, part2)
   where
-    part1 = show . requiredOre xs . toDepMap $ [(1, "FUEL")]
+    reactionMap = indexByProduct xs
+    part1 = show . requiredOre reactionMap . toDepMap $ [(1, "FUEL")]
     part2 = "not yet implemented"
 
 solve :: IO (Either String (String, String))
