@@ -7,7 +7,7 @@ import Data.Array.IArray (listArray)
 import Control.Monad.State (get)
 import Control.Monad.RWS (evalRWS)
 
-import Advent2019.Intcode (IntcodeCompute, MachineState(..), Machine, ParameterMode(..))
+import Advent2019.Intcode (IntcodeCompute, MachineState(..), Machine(..), ParameterMode(..))
 import Advent2019.Intcode.Instruction ( add
                                       , multiply
                                       , readInputOp
@@ -20,7 +20,7 @@ import Advent2019.Intcode.Instruction ( add
 import Advent2019.Intcode.Machine (valueAtAddress)
 
 newMachine :: [Int] -> [Int] -> Machine
-newMachine program input = (0, arr, input, Running)
+newMachine program input = Machine 0 arr input Running
   where
     n = length program
     arr = listArray (0, n - 1) program
@@ -33,7 +33,7 @@ decodeInstruction inst = (opcode, paramModes ++ repeat PositionMode)
 
 executeOneInstruction :: IntcodeCompute ()
 executeOneInstruction = do
-  (pc, _, _, _) <- get
+  pc <- instructionPointer <$> get
   inst <- valueAtAddress pc
   let (opcode, paramModes) = decodeInstruction inst
   let action = case opcode of
@@ -50,7 +50,7 @@ executeOneInstruction = do
 
 runMachine :: IntcodeCompute ()
 runMachine = do
-  (_, _, _, status) <- get
+  status <- state <$> get
   case status of
     Terminated -> return ()
     Running -> executeOneInstruction >> runMachine

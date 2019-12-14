@@ -11,13 +11,14 @@ module Advent2019.Intcode.Instruction
   ) where
 
 import Control.Monad (liftM2)
-import Control.Monad.State (get, put)
+import Control.Monad.State (get, put, modify)
 import Control.Monad.Writer (tell)
 
 import Advent2019.Intcode ( MachineState(..)
                           , IntcodeCompute
                           , ParameterMode(..)
                           , Operand(..)
+                          , Machine(..)
                           )
 import Advent2019.Intcode.Machine ( valueAtAddress
                                   , writeToAddress
@@ -31,7 +32,7 @@ resolveOperand (Immediate x) = return x
 
 instruction :: Int -> [ParameterMode] -> ([Operand] -> IntcodeCompute a) -> IntcodeCompute a
 instruction numParams modes effect = do
-  (pc, _, _, _) <- get
+  pc <- instructionPointer <$> get
   valuesInOperandPositions <- mapM (\p -> valueAtAddress $ pc + p + 1) [0..numParams-1]
   let operands = zipWith (\mode -> case mode of
                                      PositionMode -> Position
@@ -93,6 +94,5 @@ equals :: [ParameterMode] -> IntcodeCompute ()
 equals = binaryOp (\a b -> fromEnum $ a == b)
 
 halt :: [ParameterMode] -> IntcodeCompute ()
-halt _ = instruction 0 [] . const $ do
-  (ip, memory, input, status) <- get
-  put (ip, memory, input ,Terminated)
+halt _ = instruction 0 [] . const $
+  modify $ (\m -> m { state = Terminated })
