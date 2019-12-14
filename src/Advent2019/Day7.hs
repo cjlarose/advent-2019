@@ -30,12 +30,28 @@ highestSignal xs = maximum $ map (trySettings xs) possibleSettings
   where
     possibleSettings = [(a, b, c, d, e) | (a:b:c:d:e:[]) <- permutations [0..4]]
 
+trySettingsWithFeedback :: [Int] -> PhaseSettings -> Int
+trySettingsWithFeedback xs (a,b,c,d,e) = last outputE
+  where
+    amp = runMachineWithInput xs
+    outputA = amp (a : 0 : outputE)
+    outputB = amp (b : outputA)
+    outputC = amp (c : outputB)
+    outputD = amp (d : outputC)
+    outputE = amp (e : outputD)
+
+highestSignalWithFeedback :: [Int] -> (Int)
+highestSignalWithFeedback xs = maximum $ map (trySettingsWithFeedback xs) possibleSettings
+  where
+    possibleSettings = [(a, b, c, d, e) | (a:b:c:d:e:[]) <- permutations [5..9]]
+
 printResults :: [Int] -> (String, String)
 printResults xs = (part1, part2)
   where
     signal = highestSignal xs
+    signalWithFeedback = highestSignalWithFeedback xs
     part1 = show signal
-    part2 = "not yet implemented"
+    part2 = show signalWithFeedback
 
 solve :: IO (Either String (String, String))
 solve = getProblemInputAsByteString 7 >>= pure . withSuccessfulParse program printResults
