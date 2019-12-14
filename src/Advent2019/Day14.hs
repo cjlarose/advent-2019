@@ -45,7 +45,7 @@ breakDownOneStep rs (req, chem) = map (\(k, d) -> (k * multiplier, d)) deps
 
 requiredOre :: [Reaction] -> Map.Map String Int -> Int
 requiredOre rs deps
-  | Map.size deps == 1 = deps ! "ORE"
+  | Map.size deps == 1 && "ORE" `Map.member` deps = deps ! "ORE"
   | otherwise = requiredOre rs $ mergeDeps depsWithoutLongest newDeps
       where
         mostComplexDep = maximumBy (comparing $ reactionChainDepth rs) . Map.keys $ deps
@@ -58,8 +58,7 @@ toDepMap = foldr (uncurry Map.insert . swap) Map.empty
 printResults :: [Reaction] -> (String, String)
 printResults xs = (part1, part2)
   where
-    fuelDeps = breakDownOneStep xs (1, "FUEL")
-    part1 = show . requiredOre xs . toDepMap $ fuelDeps
+    part1 = show . requiredOre xs . toDepMap $ [(1, "FUEL")]
     part2 = "not yet implemented"
 
 solve :: IO (Either String (String, String))
