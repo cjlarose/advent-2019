@@ -58,7 +58,7 @@ toDepMap = foldr (uncurry Map.insert . swap) Map.empty
 printResults :: [Reaction] -> (String, String)
 printResults xs = (part1, part2)
   where
-    fuelDeps = reactants $ productionRule xs "FUEL"
+    fuelDeps = breakDownOneStep xs (1, "FUEL")
     part1 = show . requiredOre xs . toDepMap $ fuelDeps
     part2 = "not yet implemented"
 
