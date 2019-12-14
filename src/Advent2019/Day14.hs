@@ -63,7 +63,6 @@ toDepMap = foldr (uncurry Map.insert . swap) Map.empty
 fuelGivenOre :: ReactionMap -> Int -> Int
 fuelGivenOre rs ore = (fromIntegral $ search (\k -> req (fromIntegral k) >= ore)) - 1
   where
-    req :: Int -> Int
     req k = requiredOre rs . toDepMap $ [(k, "FUEL")]
 
 printResults :: [Reaction] -> (String, String)
