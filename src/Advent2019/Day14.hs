@@ -2,7 +2,6 @@ module Advent2019.Day14
   ( solve
   ) where
 
-import Data.Maybe (fromJust)
 import Data.List (find, maximumBy)
 import Data.Ord (comparing)
 import qualified Data.Map.Strict as Map
@@ -11,6 +10,7 @@ import Text.Parsec (many1, sepEndBy1, eof, sepBy1)
 import Text.Parsec.Char (endOfLine, digit, space, char, upper)
 import Text.Parsec.ByteString (Parser)
 import Data.Tuple (swap)
+import Numeric.Search.Integer (search)
 
 import Advent2019.Input (getProblemInputAsByteString, withSuccessfulParse)
 
@@ -59,12 +59,18 @@ requiredOre rs deps
 toDepMap :: [(Int, String)] -> Map.Map String Int
 toDepMap = foldr (uncurry Map.insert . swap) Map.empty
 
+fuelGivenOre :: ReactionMap -> Int -> Int
+fuelGivenOre rs ore = (fromIntegral $ search (\k -> req (fromIntegral k) >= ore)) - 1
+  where
+    req :: Int -> Int
+    req k = requiredOre rs . toDepMap $ [(k, "FUEL")]
+
 printResults :: [Reaction] -> (String, String)
 printResults xs = (part1, part2)
   where
     reactionMap = indexByProduct xs
     part1 = show . requiredOre reactionMap . toDepMap $ [(1, "FUEL")]
-    part2 = "not yet implemented"
+    part2 = show $ fuelGivenOre reactionMap 1000000000000
 
 solve :: IO (Either String (String, String))
 solve = getProblemInputAsByteString 14 >>= pure . withSuccessfulParse reactions printResults
