@@ -48,13 +48,14 @@ breakDownOneStep rs (req, chem) = map (\(k, d) -> (k * multiplier, d)) deps
     multiplier = ceiling $ fromIntegral req / fromIntegral yield
 
 requiredOre :: ReactionMap -> Map.Map String Int -> Int
-requiredOre rs deps
-  | Map.size deps == 1 && "ORE" `Map.member` deps = deps ! "ORE"
-  | otherwise = requiredOre rs $ mergeDeps depsWithoutLongest newDeps
-      where
-        mostComplexDep = maximumBy (comparing $ reactionChainDepth rs) . Map.keys $ deps
-        depsWithoutLongest = Map.delete mostComplexDep deps
-        newDeps = toDepMap . breakDownOneStep rs $ (deps ! mostComplexDep, mostComplexDep)
+requiredOre rs deps = if maxDepth == 0
+                      then deps ! "ORE"
+                      else requiredOre rs $ mergeDeps depsWithoutLongest newDeps
+  where
+    mostComplexDep = maximumBy (comparing $ reactionChainDepth rs) . Map.keys $ deps
+    maxDepth = reactionChainDepth rs mostComplexDep
+    depsWithoutLongest = Map.delete mostComplexDep deps
+    newDeps = toDepMap . breakDownOneStep rs $ (deps ! mostComplexDep, mostComplexDep)
 
 toDepMap :: [(Int, String)] -> Map.Map String Int
 toDepMap = foldr (uncurry Map.insert . swap) Map.empty
