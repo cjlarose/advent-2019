@@ -29,9 +29,8 @@ import Advent2019.Intcode.Machine ( valueAtAddress
                                   )
 
 resolveValueOperand :: Operand -> IntcodeCompute Integer
-resolveValueOperand (Position x) = valueAtAddress x
 resolveValueOperand (Immediate x) = return x
-resolveValueOperand (Relative x) = (+ x) <$> getRelativeBase >>= valueAtAddress
+resolveValueOperand addr = resolveAddressOperand addr >>= valueAtAddress
 
 resolveAddressOperand :: Operand -> IntcodeCompute Integer
 resolveAddressOperand (Position absoluteAddr) = pure absoluteAddr
