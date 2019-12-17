@@ -7,15 +7,15 @@ module Advent2019.Intcode
   ) where
 
 import Control.Monad.RWS (RWS)
-import Data.Array.Unboxed (UArray)
+import Data.Array (Array)
 
 data MachineState = Running | Terminated
 data Machine = Machine
-  { instructionPointer :: Int
-  , memory :: UArray Int Int
-  , input :: [Int]
+  { instructionPointer :: Integer
+  , memory :: Array Integer Integer
+  , input :: [Integer]
   , state :: MachineState }
-type IntcodeCompute = RWS () [Int] Machine
+type IntcodeCompute = RWS () [Integer] Machine
 
 data ParameterMode = PositionMode | ImmediateMode deriving (Enum)
-data Operand = Position Int | Immediate Int
+data Operand = Position Integer | Immediate Integer

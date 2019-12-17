@@ -26,14 +26,14 @@ import Advent2019.Intcode.Machine ( valueAtAddress
                                   , updateInstructionPointer
                                   )
 
-resolveOperand :: Operand -> IntcodeCompute Int
+resolveOperand :: Operand -> IntcodeCompute Integer
 resolveOperand (Position x) = valueAtAddress x
 resolveOperand (Immediate x) = return x
 
 instruction :: Int -> [ParameterMode] -> ([Operand] -> IntcodeCompute a) -> IntcodeCompute a
 instruction numParams modes effect = do
   pc <- instructionPointer <$> get
-  valuesInOperandPositions <- mapM (\p -> valueAtAddress $ pc + p + 1) [0..numParams-1]
+  valuesInOperandPositions <- mapM (\p -> valueAtAddress $ pc + (fromIntegral p) + 1) [0..numParams-1]
   let operands = zipWith (\mode -> case mode of
                                      PositionMode -> Position
                                      ImmediateMode -> Immediate)
@@ -42,9 +42,9 @@ instruction numParams modes effect = do
   effect operands
 
 nonJumpInstruction :: Int -> [ParameterMode] -> ([Operand] -> IntcodeCompute a) -> IntcodeCompute a
-nonJumpInstruction numParams modes effect = instruction numParams modes effect <* updateInstructionPointer (+ (numParams + 1))
+nonJumpInstruction numParams modes effect = instruction numParams modes effect <* updateInstructionPointer (+ (fromIntegral $ numParams + 1))
 
-binaryOp :: (Int -> Int -> Int) -> [ParameterMode] -> IntcodeCompute ()
+binaryOp :: (Integer -> Integer -> Integer) -> [ParameterMode] -> IntcodeCompute ()
 binaryOp f modes = nonJumpInstruction 3 modes execute
   where
     execute [a1, a2, Position destAddr] =
@@ -88,10 +88,10 @@ jumpIfFalse modes = instruction 2 modes execute
       else updateInstructionPointer (+ 3)
 
 lessThan :: [ParameterMode] -> IntcodeCompute ()
-lessThan = binaryOp (\a b -> fromEnum $ a < b)
+lessThan = binaryOp (\a b -> fromIntegral . fromEnum $ a < b)
 
 equals :: [ParameterMode] -> IntcodeCompute ()
-equals = binaryOp (\a b -> fromEnum $ a == b)
+equals = binaryOp (\a b -> fromIntegral . fromEnum $ a == b)
 
 halt :: [ParameterMode] -> IntcodeCompute ()
 halt _ = instruction 0 [] . const $

@@ -3,7 +3,7 @@ module Advent2019.Intcode.Execute
   , runMachine
   ) where
 
-import Data.Array.IArray (listArray)
+import Data.Array (listArray)
 import Control.Monad.State (get)
 import Control.Monad.RWS (evalRWS)
 
@@ -19,13 +19,13 @@ import Advent2019.Intcode.Instruction ( add
                                       , halt)
 import Advent2019.Intcode.Machine (valueAtAddress)
 
-newMachine :: [Int] -> [Int] -> Machine
+newMachine :: [Integer] -> [Integer] -> Machine
 newMachine program input = Machine 0 arr input Running
   where
-    n = length program
+    n = fromIntegral . length $ program
     arr = listArray (0, n - 1) program
 
-decodeInstruction :: Int -> (Int, [ParameterMode])
+decodeInstruction :: Integer -> (Integer, [ParameterMode])
 decodeInstruction inst = (opcode, paramModes ++ repeat PositionMode)
   where
     (rest, opcode) = inst `divMod` 100
@@ -55,5 +55,5 @@ runMachine = do
     Terminated -> return ()
     Running -> executeOneInstruction >> runMachine
 
-withMachine :: [Int] -> [Int] -> IntcodeCompute a -> (a, [Int])
+withMachine :: [Integer] -> [Integer] -> IntcodeCompute a -> (a, [Integer])
 withMachine program input action = evalRWS action () (newMachine program input)

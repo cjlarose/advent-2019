@@ -10,17 +10,17 @@ import Advent2019.Intcode.Machine (writeToAddress, valueAtAddress)
 import Advent2019.Intcode.Parse (program)
 import Advent2019.Intcode.Execute (withMachine, runMachine)
 
-runProgramWithInputs :: [Int] -> (Int, Int) -> Int
+runProgramWithInputs :: [Integer] -> (Integer, Integer) -> Integer
 runProgramWithInputs xs (a, b) = fst . withMachine xs [] $ do
   writeToAddress 1 a
   writeToAddress 2 b
   runMachine
   valueAtAddress 0
 
-findNounVerb :: [Int] -> Int -> (Int, Int)
+findNounVerb :: [Integer] -> Integer -> (Integer, Integer)
 findNounVerb xs n = fst . fromJust . find ((== n) . snd) . map (\p -> (p, runProgramWithInputs xs p)) $ [(a, b) | a <- [0..99], b <- [0..99]]
 
-printResults :: [Int] -> (String, String)
+printResults :: [Integer] -> (String, String)
 printResults xs = (part1, part2)
   where
     part1 = show $ runProgramWithInputs xs (12, 2)

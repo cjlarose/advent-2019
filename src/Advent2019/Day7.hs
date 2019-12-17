@@ -10,12 +10,12 @@ import Advent2019.Input (getProblemInputAsByteString, withSuccessfulParse)
 import Advent2019.Intcode.Parse (program)
 import Advent2019.Intcode.Execute (withMachine, runMachine)
 
-runMachineWithInput :: [Int] -> [Int] -> [Int]
+runMachineWithInput :: [Integer] -> [Integer] -> [Integer]
 runMachineWithInput xs input = snd $ withMachine xs input runMachine
 
-type PhaseSettings = (Int, Int, Int, Int, Int)
+type PhaseSettings = (Integer, Integer, Integer, Integer, Integer)
 
-trySettings :: [Int] -> PhaseSettings -> Int
+trySettings :: [Integer] -> PhaseSettings -> Integer
 trySettings xs (a,b,c,d,e) = last outputE
   where
     amp = runMachineWithInput xs
@@ -25,12 +25,12 @@ trySettings xs (a,b,c,d,e) = last outputE
     outputD = amp (d : outputC)
     outputE = amp (e : outputD)
 
-highestSignal :: [Int] -> (Int)
+highestSignal :: [Integer] -> Integer
 highestSignal xs = maximum $ map (trySettings xs) possibleSettings
   where
     possibleSettings = [(a, b, c, d, e) | (a:b:c:d:e:[]) <- permutations [0..4]]
 
-trySettingsWithFeedback :: [Int] -> PhaseSettings -> Int
+trySettingsWithFeedback :: [Integer] -> PhaseSettings -> Integer
 trySettingsWithFeedback xs (a,b,c,d,e) = last outputE
   where
     amp = runMachineWithInput xs
@@ -40,12 +40,12 @@ trySettingsWithFeedback xs (a,b,c,d,e) = last outputE
     outputD = amp (d : outputC)
     outputE = amp (e : outputD)
 
-highestSignalWithFeedback :: [Int] -> (Int)
+highestSignalWithFeedback :: [Integer] -> Integer
 highestSignalWithFeedback xs = maximum $ map (trySettingsWithFeedback xs) possibleSettings
   where
     possibleSettings = [(a, b, c, d, e) | (a:b:c:d:e:[]) <- permutations [5..9]]
 
-printResults :: [Int] -> (String, String)
+printResults :: [Integer] -> (String, String)
 printResults xs = (part1, part2)
   where
     signal = highestSignal xs

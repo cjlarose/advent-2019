@@ -10,19 +10,19 @@ import Data.Array.Unboxed ((//), (!))
 
 import Advent2019.Intcode (IntcodeCompute, instructionPointer, Machine(..))
 
-updateMemory :: [(Int, Int)] -> IntcodeCompute ()
+updateMemory :: [(Integer, Integer)] -> IntcodeCompute ()
 updateMemory updates = do
   newMemory <- (\x -> x // updates) . memory <$> get
   modify $ (\x -> x { memory = newMemory })
 
-writeToAddress :: Int -> Int -> IntcodeCompute ()
+writeToAddress :: Integer -> Integer -> IntcodeCompute ()
 writeToAddress addr val = updateMemory [(addr, val)]
 
-valueAtAddress :: Int -> IntcodeCompute Int
+valueAtAddress :: Integer -> IntcodeCompute Integer
 valueAtAddress addr = (\x -> x ! addr) . memory <$> get
 
-readInput :: IntcodeCompute Int
+readInput :: IntcodeCompute Integer
 readInput = (head . input <$> get) <* (modify $ (\x -> x { input = tail . input $ x }))
 
-updateInstructionPointer :: (Int -> Int) -> IntcodeCompute ()
+updateInstructionPointer :: (Integer -> Integer) -> IntcodeCompute ()
 updateInstructionPointer f = modify $ (\x -> x { instructionPointer = f $ instructionPointer x })

@@ -6,10 +6,10 @@ import Advent2019.Input (getProblemInputAsByteString, withSuccessfulParse)
 import Advent2019.Intcode.Parse (program)
 import Advent2019.Intcode.Execute (withMachine, runMachine)
 
-runMachineWithInput :: [Int] -> [Int] -> [Int]
+runMachineWithInput :: [Integer] -> [Integer] -> [Integer]
 runMachineWithInput xs input = snd $ withMachine xs input runMachine
 
-printResults :: [Int] -> (String, String)
+printResults :: [Integer] -> (String, String)
 printResults xs = (part1, part2)
   where
     airConditionerTestOutput = runMachineWithInput xs [1]
