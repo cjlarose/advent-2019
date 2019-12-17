@@ -8,6 +8,7 @@ module Advent2019.Intcode.Machine
   , getStatus
   , setTerminated
   , getRelativeBase
+  , setRelativeBase
   ) where
 
 import Control.Monad.State (get, put, modify)
@@ -54,3 +55,6 @@ setTerminated =  modify $ (\m -> m { state = Terminated })
 
 getRelativeBase :: IntcodeCompute Integer
 getRelativeBase = relativeBase <$> get
+
+setRelativeBase :: Integer -> IntcodeCompute ()
+setRelativeBase base = modify $ (\m -> m { relativeBase = base })

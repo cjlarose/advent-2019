@@ -15,6 +15,7 @@ import Advent2019.Intcode.Instruction ( add
                                       , jumpIfFalse
                                       , lessThan
                                       , equals
+                                      , adjustRelativeBase
                                       , halt)
 import Advent2019.Intcode.Machine (newMachine, valueAtAddress, readInstructionPointer, getStatus)
 
@@ -38,6 +39,7 @@ executeOneInstruction = do
                  6 -> jumpIfFalse
                  7 -> lessThan
                  8 -> equals
+                 9 -> adjustRelativeBase
                  99 -> halt
   action paramModes
 

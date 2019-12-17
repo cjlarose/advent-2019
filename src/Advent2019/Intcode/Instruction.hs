@@ -7,6 +7,7 @@ module Advent2019.Intcode.Instruction
   , jumpIfFalse
   , lessThan
   , equals
+  , adjustRelativeBase
   , halt
   ) where
 
@@ -24,6 +25,7 @@ import Advent2019.Intcode.Machine ( valueAtAddress
                                   , updateInstructionPointer
                                   , setTerminated
                                   , getRelativeBase
+                                  , setRelativeBase
                                   )
 
 resolveOperand :: Operand -> IntcodeCompute Integer
@@ -94,6 +96,11 @@ lessThan = binaryOp (\a b -> fromIntegral . fromEnum $ a < b)
 
 equals :: [ParameterMode] -> IntcodeCompute ()
 equals = binaryOp (\a b -> fromIntegral . fromEnum $ a == b)
+
+adjustRelativeBase :: [ParameterMode] -> IntcodeCompute ()
+adjustRelativeBase modes = nonJumpInstruction 1 modes execute
+  where
+    execute [a1] = resolveOperand a1 >>= setRelativeBase
 
 halt :: [ParameterMode] -> IntcodeCompute ()
 halt _ = instruction 0 [] . const $ setTerminated
