@@ -13,6 +13,7 @@ import qualified Advent2019.Day3
 import qualified Advent2019.Day4
 import qualified Advent2019.Day5
 import qualified Advent2019.Day7
+import qualified Advent2019.Day9
 import qualified Advent2019.Day14
 
 solver :: Int -> IO (Either String (String, String))
@@ -22,6 +23,7 @@ solver 3 = Advent2019.Day3.solve
 solver 4 = Advent2019.Day4.solve
 solver 5 = Advent2019.Day5.solve
 solver 7 = Advent2019.Day7.solve
+solver 9 = Advent2019.Day9.solve
 solver 14 = Advent2019.Day14.solve
 solver n = pure . Left $ "Unknown problem " ++ show n
 
