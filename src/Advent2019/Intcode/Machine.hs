@@ -36,7 +36,7 @@ writeToAddress :: Integer -> Integer -> IntcodeCompute ()
 writeToAddress addr val = updateMemory [(addr, val)]
 
 valueAtAddress :: Integer -> IntcodeCompute Integer
-valueAtAddress addr = maybe 0 id . Map.lookup addr <$> gets memory
+valueAtAddress addr = Map.findWithDefault 0 addr <$> gets memory
 
 readInput :: IntcodeCompute Integer
 readInput = (head <$> gets input) <* modify (\x -> x { input = tail . input $ x })
