@@ -31,7 +31,7 @@ import Advent2019.Intcode.Machine ( valueAtAddress
 resolveOperand :: Operand -> IntcodeCompute Integer
 resolveOperand (Position x) = valueAtAddress x
 resolveOperand (Immediate x) = return x
-resolveOperand (Relative x) = (+ x ) <$> getRelativeBase >>= valueAtAddress
+resolveOperand (Relative x) = (+ x) <$> getRelativeBase >>= valueAtAddress
 
 instruction :: Int -> [ParameterMode] -> ([Operand] -> IntcodeCompute a) -> IntcodeCompute a
 instruction numParams modes effect = do
