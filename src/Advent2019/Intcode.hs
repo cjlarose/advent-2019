@@ -7,12 +7,12 @@ module Advent2019.Intcode
   ) where
 
 import Control.Monad.RWS (RWS)
-import Data.Array (Array)
+import qualified Data.Map.Strict as Map
 
 data MachineState = Running | Terminated
 data Machine = Machine
   { instructionPointer :: Integer
-  , memory :: Array Integer Integer
+  , memory :: Map.Map Integer Integer
   , input :: [Integer]
   , state :: MachineState }
 type IntcodeCompute = RWS () [Integer] Machine

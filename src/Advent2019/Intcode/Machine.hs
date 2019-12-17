@@ -10,26 +10,27 @@ module Advent2019.Intcode.Machine
   ) where
 
 import Control.Monad.State (get, put, modify)
-import Data.Array.Unboxed ((//), (!), listArray)
+import qualified Data.Map.Strict as Map
 
 import Advent2019.Intcode (IntcodeCompute, instructionPointer, Machine(..), MachineState(..))
 
 newMachine :: [Integer] -> [Integer] -> Machine
-newMachine program input = Machine 0 arr input Running
+newMachine program input = Machine 0 tape input Running
   where
     n = fromIntegral . length $ program
-    arr = listArray (0, n - 1) program
+    tape = Map.fromList . zip [0..] $ program
 
 updateMemory :: [(Integer, Integer)] -> IntcodeCompute ()
 updateMemory updates = do
-  newMemory <- (\x -> x // updates) . memory <$> get
+  currentMemory <- memory <$> get
+  let newMemory = foldr (uncurry Map.insert) currentMemory updates
   modify $ (\x -> x { memory = newMemory })
 
 writeToAddress :: Integer -> Integer -> IntcodeCompute ()
 writeToAddress addr val = updateMemory [(addr, val)]
 
 valueAtAddress :: Integer -> IntcodeCompute Integer
-valueAtAddress addr = (\x -> x ! addr) . memory <$> get
+valueAtAddress addr = maybe 0 id . Map.lookup addr . memory <$> get
 
 readInput :: IntcodeCompute Integer
 readInput = (head . input <$> get) <* (modify $ (\x -> x { input = tail . input $ x }))
