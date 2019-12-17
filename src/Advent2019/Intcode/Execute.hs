@@ -3,10 +3,9 @@ module Advent2019.Intcode.Execute
   , runMachine
   ) where
 
-import Control.Monad.State (get)
 import Control.Monad.RWS (evalRWS)
 
-import Advent2019.Intcode (IntcodeCompute, Machine(..), MachineState(..), ParameterMode(..))
+import Advent2019.Intcode (IntcodeCompute, MachineState(..), ParameterMode(..))
 import Advent2019.Intcode.Instruction ( add
                                       , multiply
                                       , readInputOp
@@ -16,7 +15,7 @@ import Advent2019.Intcode.Instruction ( add
                                       , lessThan
                                       , equals
                                       , halt)
-import Advent2019.Intcode.Machine (newMachine, valueAtAddress, readInstructionPointer)
+import Advent2019.Intcode.Machine (newMachine, valueAtAddress, readInstructionPointer, getStatus)
 
 decodeInstruction :: Integer -> (Integer, [ParameterMode])
 decodeInstruction inst = (opcode, paramModes ++ repeat PositionMode)
@@ -43,7 +42,7 @@ executeOneInstruction = do
 
 runMachine :: IntcodeCompute ()
 runMachine = do
-  status <- state <$> get
+  status <- getStatus
   case status of
     Terminated -> return ()
     Running -> executeOneInstruction >> runMachine
