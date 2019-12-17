@@ -21,7 +21,6 @@ newMachine program input = Machine { instructionPointer = 0
                                    , state = Running
                                    }
   where
-    n = fromIntegral . length $ program
     tape = Map.fromList . zip [0..] $ program
 
 updateMemory :: [(Integer, Integer)] -> IntcodeCompute ()
