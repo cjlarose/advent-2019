@@ -15,9 +15,9 @@ runProgramInMode mode program = runMachineWithInput program [mode]
 printResults :: [Integer] -> (String, String)
 printResults program = (part1, part2)
   where
-    boostKeycode = last . runProgramInMode 1 $ program
+    boostKeycode = last . runProgramInMode testMode $ program
     part1 = show boostKeycode
-    distressSignalCoordinates = last . runProgramInMode 2 $ program
+    distressSignalCoordinates = last . runProgramInMode sensorBoostMode $ program
     part2 = show distressSignalCoordinates
 
 solve :: IO (Either String (String, String))
