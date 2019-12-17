@@ -16,7 +16,7 @@ import Advent2019.Intcode.Instruction ( add
                                       , lessThan
                                       , equals
                                       , halt)
-import Advent2019.Intcode.Machine (newMachine, valueAtAddress)
+import Advent2019.Intcode.Machine (newMachine, valueAtAddress, readInstructionPointer)
 
 decodeInstruction :: Integer -> (Integer, [ParameterMode])
 decodeInstruction inst = (opcode, paramModes ++ repeat PositionMode)
@@ -26,7 +26,7 @@ decodeInstruction inst = (opcode, paramModes ++ repeat PositionMode)
 
 executeOneInstruction :: IntcodeCompute ()
 executeOneInstruction = do
-  pc <- instructionPointer <$> get
+  pc <- readInstructionPointer
   inst <- valueAtAddress pc
   let (opcode, paramModes) = decodeInstruction inst
   let action = case opcode of

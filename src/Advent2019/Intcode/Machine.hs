@@ -2,6 +2,7 @@ module Advent2019.Intcode.Machine
   ( writeToAddress
   , valueAtAddress
   , readInput
+  , readInstructionPointer
   , updateInstructionPointer
   , newMachine
   ) where
@@ -30,6 +31,9 @@ valueAtAddress addr = (\x -> x ! addr) . memory <$> get
 
 readInput :: IntcodeCompute Integer
 readInput = (head . input <$> get) <* (modify $ (\x -> x { input = tail . input $ x }))
+
+readInstructionPointer :: IntcodeCompute Integer
+readInstructionPointer = instructionPointer <$> get
 
 updateInstructionPointer :: (Integer -> Integer) -> IntcodeCompute ()
 updateInstructionPointer f = modify $ (\x -> x { instructionPointer = f $ instructionPointer x })
