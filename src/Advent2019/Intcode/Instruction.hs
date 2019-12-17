@@ -54,6 +54,9 @@ binaryOp f modes = nonJumpInstruction 3 modes execute
     execute [a1, a2, Position destAddr] =
       liftM2 f (resolveOperand a1) (resolveOperand a2) >>=
         writeToAddress destAddr
+    execute [a1, a2, Relative relativeAddr] = do
+      absoluteAddr <- (+ relativeAddr) <$> getRelativeBase
+      execute [a1, a2, Position absoluteAddr]
 
 add :: [ParameterMode] -> IntcodeCompute ()
 add = binaryOp (+)
@@ -65,6 +68,9 @@ readInputOp :: [ParameterMode] -> IntcodeCompute ()
 readInputOp modes = nonJumpInstruction 1 modes execute
   where
     execute [Position destAddr] = readInput >>= writeToAddress destAddr
+    execute [Relative relativeAddr] = do
+      absoluteAddr <- (+ relativeAddr) <$> getRelativeBase
+      execute [Position absoluteAddr]
 
 writeOutput :: [ParameterMode] -> IntcodeCompute ()
 writeOutput modes = nonJumpInstruction 1 modes execute
