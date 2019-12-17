@@ -15,7 +15,11 @@ import qualified Data.Map.Strict as Map
 import Advent2019.Intcode (IntcodeCompute, instructionPointer, Machine(..), MachineState(..))
 
 newMachine :: [Integer] -> [Integer] -> Machine
-newMachine program input = Machine 0 tape input Running
+newMachine program input = Machine { instructionPointer = 0
+                                   , memory = tape
+                                   , input = input
+                                   , state = Running
+                                   }
   where
     n = fromIntegral . length $ program
     tape = Map.fromList . zip [0..] $ program
