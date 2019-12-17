@@ -8,10 +8,7 @@ import Data.List (permutations)
 
 import Advent2019.Input (getProblemInputAsByteString, withSuccessfulParse)
 import Advent2019.Intcode.Parse (program)
-import Advent2019.Intcode.Execute (withMachine, runMachine)
-
-runMachineWithInput :: [Integer] -> [Integer] -> [Integer]
-runMachineWithInput xs input = snd $ withMachine xs input runMachine
+import Advent2019.Intcode.Execute (runMachineWithInput)
 
 type PhaseSettings = (Integer, Integer, Integer, Integer, Integer)
 

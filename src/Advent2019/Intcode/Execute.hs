@@ -1,6 +1,7 @@
 module Advent2019.Intcode.Execute
   ( withMachine
   , runMachine
+  , runMachineWithInput
   ) where
 
 import Control.Monad.RWS (evalRWS)
@@ -49,3 +50,6 @@ runMachine = do
 
 withMachine :: [Integer] -> [Integer] -> IntcodeCompute a -> (a, [Integer])
 withMachine program input action = evalRWS action () (newMachine program input)
+
+runMachineWithInput :: [Integer] -> [Integer] -> [Integer]
+runMachineWithInput program input = snd $ withMachine program input runMachine
