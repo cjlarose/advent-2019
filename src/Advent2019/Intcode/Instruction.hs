@@ -25,7 +25,7 @@ import Advent2019.Intcode.Machine ( valueAtAddress
                                   , updateInstructionPointer
                                   , setTerminated
                                   , getRelativeBase
-                                  , setRelativeBase
+                                  , updateRelativeBase
                                   )
 
 resolveOperand :: Operand -> IntcodeCompute Integer
@@ -100,7 +100,11 @@ equals = binaryOp (\a b -> fromIntegral . fromEnum $ a == b)
 adjustRelativeBase :: [ParameterMode] -> IntcodeCompute ()
 adjustRelativeBase modes = nonJumpInstruction 1 modes execute
   where
-    execute [a1] = resolveOperand a1 >>= setRelativeBase
+    execute [Relative a1] = do
+      rb <- getRelativeBase
+      val <- resolveOperand (Position $ a1 + rb)
+      updateRelativeBase val
+    execute [a1] = resolveOperand a1 >>= updateRelativeBase
 
 halt :: [ParameterMode] -> IntcodeCompute ()
 halt _ = instruction 0 [] . const $ setTerminated
