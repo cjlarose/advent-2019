@@ -11,20 +11,18 @@ module Advent2019.Intcode.Instruction
   ) where
 
 import Control.Monad (liftM2)
-import Control.Monad.State (modify)
 import Control.Monad.Writer (tell)
 
-import Advent2019.Intcode ( MachineState(..)
-                          , IntcodeCompute
+import Advent2019.Intcode ( IntcodeCompute
                           , ParameterMode(..)
                           , Operand(..)
-                          , Machine(..)
                           )
 import Advent2019.Intcode.Machine ( valueAtAddress
                                   , writeToAddress
                                   , readInput
                                   , readInstructionPointer
                                   , updateInstructionPointer
+                                  , setTerminated
                                   )
 
 resolveOperand :: Operand -> IntcodeCompute Integer
@@ -95,5 +93,4 @@ equals :: [ParameterMode] -> IntcodeCompute ()
 equals = binaryOp (\a b -> fromIntegral . fromEnum $ a == b)
 
 halt :: [ParameterMode] -> IntcodeCompute ()
-halt _ = instruction 0 [] . const $
-  modify $ (\m -> m { state = Terminated })
+halt _ = instruction 0 [] . const $ setTerminated

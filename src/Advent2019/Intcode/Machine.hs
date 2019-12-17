@@ -6,6 +6,7 @@ module Advent2019.Intcode.Machine
   , updateInstructionPointer
   , newMachine
   , getStatus
+  , setTerminated
   ) where
 
 import Control.Monad.State (get, put, modify)
@@ -41,3 +42,6 @@ updateInstructionPointer f = modify $ (\x -> x { instructionPointer = f $ instru
 
 getStatus :: IntcodeCompute MachineState
 getStatus = state <$> get
+
+setTerminated :: IntcodeCompute ()
+setTerminated =  modify $ (\m -> m { state = Terminated })
