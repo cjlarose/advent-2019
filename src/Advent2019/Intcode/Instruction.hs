@@ -28,10 +28,10 @@ import Advent2019.Intcode.Machine ( valueAtAddress
                                   , updateRelativeBase
                                   )
 
-resolveOperand :: Operand -> IntcodeCompute Integer
-resolveOperand (Position x) = valueAtAddress x
-resolveOperand (Immediate x) = return x
-resolveOperand (Relative x) = (+ x) <$> getRelativeBase >>= valueAtAddress
+resolveValueOperand :: Operand -> IntcodeCompute Integer
+resolveValueOperand (Position x) = valueAtAddress x
+resolveValueOperand (Immediate x) = return x
+resolveValueOperand (Relative x) = (+ x) <$> getRelativeBase >>= valueAtAddress
 
 resolveAddressOperand :: Operand -> IntcodeCompute Integer
 resolveAddressOperand (Position absoluteAddr) = pure absoluteAddr
@@ -56,7 +56,7 @@ binaryOp :: (Integer -> Integer -> Integer) -> [ParameterMode] -> IntcodeCompute
 binaryOp f modes = nonJumpInstruction 3 modes execute
   where
     execute [a1, a2, destAddr] = do
-      result <- liftM2 f (resolveOperand a1) (resolveOperand a2)
+      result <- liftM2 f (resolveValueOperand a1) (resolveValueOperand a2)
       addr <- resolveAddressOperand destAddr
       writeToAddress addr result
 
@@ -77,14 +77,14 @@ readInputOp modes = nonJumpInstruction 1 modes execute
 writeOutput :: [ParameterMode] -> IntcodeCompute ()
 writeOutput modes = nonJumpInstruction 1 modes execute
   where
-    execute (operand:[]) = resolveOperand operand >>= tell . pure
+    execute (operand:[]) = resolveValueOperand operand >>= tell . pure
 
 jumpIfTrue :: [ParameterMode] -> IntcodeCompute ()
 jumpIfTrue modes = instruction 2 modes execute
   where
     execute [a1, a2] = do
-      operand1 <- resolveOperand a1
-      operand2 <- resolveOperand a2
+      operand1 <- resolveValueOperand a1
+      operand2 <- resolveValueOperand a2
       if operand1 /= 0
       then updateInstructionPointer (const operand2)
       else updateInstructionPointer (+ 3)
@@ -93,8 +93,8 @@ jumpIfFalse :: [ParameterMode] -> IntcodeCompute ()
 jumpIfFalse modes = instruction 2 modes execute
   where
     execute [a1, a2] = do
-      operand1 <- resolveOperand a1
-      operand2 <- resolveOperand a2
+      operand1 <- resolveValueOperand a1
+      operand2 <- resolveValueOperand a2
       if operand1 == 0
       then updateInstructionPointer (const operand2)
       else updateInstructionPointer (+ 3)
@@ -108,7 +108,7 @@ equals = binaryOp (\a b -> fromIntegral . fromEnum $ a == b)
 adjustRelativeBase :: [ParameterMode] -> IntcodeCompute ()
 adjustRelativeBase modes = nonJumpInstruction 1 modes execute
   where
-    execute [a1] = resolveOperand a1 >>= updateRelativeBase
+    execute [a1] = resolveValueOperand a1 >>= updateRelativeBase
 
 halt :: [ParameterMode] -> IntcodeCompute ()
 halt _ = instruction 0 [] . const $ setTerminated
