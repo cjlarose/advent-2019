@@ -3,12 +3,19 @@ module Advent2019.Intcode.Machine
   , valueAtAddress
   , readInput
   , updateInstructionPointer
+  , newMachine
   ) where
 
 import Control.Monad.State (get, put, modify)
-import Data.Array.Unboxed ((//), (!))
+import Data.Array.Unboxed ((//), (!), listArray)
 
-import Advent2019.Intcode (IntcodeCompute, instructionPointer, Machine(..))
+import Advent2019.Intcode (IntcodeCompute, instructionPointer, Machine(..), MachineState(..))
+
+newMachine :: [Integer] -> [Integer] -> Machine
+newMachine program input = Machine 0 arr input Running
+  where
+    n = fromIntegral . length $ program
+    arr = listArray (0, n - 1) program
 
 updateMemory :: [(Integer, Integer)] -> IntcodeCompute ()
 updateMemory updates = do
