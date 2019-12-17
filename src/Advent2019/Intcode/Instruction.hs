@@ -33,6 +33,10 @@ resolveOperand (Position x) = valueAtAddress x
 resolveOperand (Immediate x) = return x
 resolveOperand (Relative x) = (+ x) <$> getRelativeBase >>= valueAtAddress
 
+resolveAddressOperand :: Operand -> IntcodeCompute Integer
+resolveAddressOperand (Position absoluteAddr) = pure absoluteAddr
+resolveAddressOperand (Relative relativeAddr) = (+ relativeAddr) <$> getRelativeBase
+
 instruction :: Int -> [ParameterMode] -> ([Operand] -> IntcodeCompute a) -> IntcodeCompute a
 instruction numParams modes effect = do
   pc <- readInstructionPointer
@@ -51,12 +55,10 @@ nonJumpInstruction numParams modes effect = instruction numParams modes effect <
 binaryOp :: (Integer -> Integer -> Integer) -> [ParameterMode] -> IntcodeCompute ()
 binaryOp f modes = nonJumpInstruction 3 modes execute
   where
-    execute [a1, a2, Position destAddr] =
-      liftM2 f (resolveOperand a1) (resolveOperand a2) >>=
-        writeToAddress destAddr
-    execute [a1, a2, Relative relativeAddr] = do
-      absoluteAddr <- (+ relativeAddr) <$> getRelativeBase
-      execute [a1, a2, Position absoluteAddr]
+    execute [a1, a2, destAddr] = do
+      result <- liftM2 f (resolveOperand a1) (resolveOperand a2)
+      addr <- resolveAddressOperand destAddr
+      writeToAddress addr result
 
 add :: [ParameterMode] -> IntcodeCompute ()
 add = binaryOp (+)
@@ -67,10 +69,10 @@ multiply = binaryOp (*)
 readInputOp :: [ParameterMode] -> IntcodeCompute ()
 readInputOp modes = nonJumpInstruction 1 modes execute
   where
-    execute [Position destAddr] = readInput >>= writeToAddress destAddr
-    execute [Relative relativeAddr] = do
-      absoluteAddr <- (+ relativeAddr) <$> getRelativeBase
-      execute [Position absoluteAddr]
+    execute [destAddr] = do
+      val <- readInput
+      addr <- resolveAddressOperand destAddr
+      writeToAddress addr val
 
 writeOutput :: [ParameterMode] -> IntcodeCompute ()
 writeOutput modes = nonJumpInstruction 1 modes execute
@@ -106,10 +108,6 @@ equals = binaryOp (\a b -> fromIntegral . fromEnum $ a == b)
 adjustRelativeBase :: [ParameterMode] -> IntcodeCompute ()
 adjustRelativeBase modes = nonJumpInstruction 1 modes execute
   where
-    execute [Relative a1] = do
-      rb <- getRelativeBase
-      val <- resolveOperand (Position $ a1 + rb)
-      updateRelativeBase val
     execute [a1] = resolveOperand a1 >>= updateRelativeBase
 
 halt :: [ParameterMode] -> IntcodeCompute ()
