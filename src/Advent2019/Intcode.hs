@@ -12,10 +12,11 @@ import qualified Data.Map.Strict as Map
 data MachineState = Running | Terminated
 data Machine = Machine
   { instructionPointer :: Integer
+  , relativeBase :: Integer
   , memory :: Map.Map Integer Integer
   , input :: [Integer]
   , state :: MachineState }
 type IntcodeCompute = RWS () [Integer] Machine
 
-data ParameterMode = PositionMode | ImmediateMode deriving (Enum)
-data Operand = Position Integer | Immediate Integer
+data ParameterMode = PositionMode | ImmediateMode | RelativeMode deriving (Enum)
+data Operand = Position Integer | Immediate Integer | Relative Integer

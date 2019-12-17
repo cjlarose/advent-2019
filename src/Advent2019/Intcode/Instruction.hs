@@ -23,11 +23,13 @@ import Advent2019.Intcode.Machine ( valueAtAddress
                                   , readInstructionPointer
                                   , updateInstructionPointer
                                   , setTerminated
+                                  , getRelativeBase
                                   )
 
 resolveOperand :: Operand -> IntcodeCompute Integer
 resolveOperand (Position x) = valueAtAddress x
 resolveOperand (Immediate x) = return x
+resolveOperand (Relative x) = liftM2 (+) getRelativeBase (valueAtAddress x)
 
 instruction :: Int -> [ParameterMode] -> ([Operand] -> IntcodeCompute a) -> IntcodeCompute a
 instruction numParams modes effect = do
@@ -35,7 +37,8 @@ instruction numParams modes effect = do
   valuesInOperandPositions <- mapM (\p -> valueAtAddress $ pc + (fromIntegral p) + 1) [0..numParams-1]
   let operands = zipWith (\mode -> case mode of
                                      PositionMode -> Position
-                                     ImmediateMode -> Immediate)
+                                     ImmediateMode -> Immediate
+                                     RelativeMode -> Relative)
                          modes
                          valuesInOperandPositions
   effect operands

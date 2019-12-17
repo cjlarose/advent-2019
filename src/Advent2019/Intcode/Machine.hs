@@ -7,6 +7,7 @@ module Advent2019.Intcode.Machine
   , newMachine
   , getStatus
   , setTerminated
+  , getRelativeBase
   ) where
 
 import Control.Monad.State (get, put, modify)
@@ -16,6 +17,7 @@ import Advent2019.Intcode (IntcodeCompute, instructionPointer, Machine(..), Mach
 
 newMachine :: [Integer] -> [Integer] -> Machine
 newMachine program input = Machine { instructionPointer = 0
+                                   , relativeBase = 0
                                    , memory = tape
                                    , input = input
                                    , state = Running
@@ -49,3 +51,6 @@ getStatus = state <$> get
 
 setTerminated :: IntcodeCompute ()
 setTerminated =  modify $ (\m -> m { state = Terminated })
+
+getRelativeBase :: IntcodeCompute Integer
+getRelativeBase = relativeBase <$> get
