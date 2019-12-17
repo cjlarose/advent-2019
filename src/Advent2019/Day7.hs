@@ -51,4 +51,4 @@ printResults xs = (part1, part2)
     part2 = show signalWithFeedback
 
 solve :: IO (Either String (String, String))
-solve = getProblemInputAsByteString 7 >>= pure . withSuccessfulParse program printResults
+solve = withSuccessfulParse program printResults <$> getProblemInputAsByteString 7

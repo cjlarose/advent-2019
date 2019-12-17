@@ -75,4 +75,4 @@ printResults (p0, p1) = (part1, part2)
     part2 = show . combinedSteps path0 path1 $ best
 
 solve :: IO (Either String (String, String))
-solve = getProblemInputAsByteString 3 >>= pure . withSuccessfulParse wires printResults
+solve = withSuccessfulParse wires printResults <$> getProblemInputAsByteString 3

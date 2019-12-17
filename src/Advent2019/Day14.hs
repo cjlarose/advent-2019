@@ -73,4 +73,4 @@ printResults xs = (part1, part2)
     part2 = show $ fuelGivenOre reactionMap 1000000000000
 
 solve :: IO (Either String (String, String))
-solve = getProblemInputAsByteString 14 >>= pure . withSuccessfulParse reactions printResults
+solve = withSuccessfulParse reactions printResults <$> getProblemInputAsByteString 14

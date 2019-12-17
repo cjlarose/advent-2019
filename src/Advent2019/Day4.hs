@@ -44,4 +44,4 @@ printResults (min, max) = (part1, part2)
     part2 = show $ numPotentialPasswords
 
 solve :: IO (Either String (String, String))
-solve = getProblemInputAsByteString 4 >>= pure . withSuccessfulParse range printResults
+solve = withSuccessfulParse range printResults <$> getProblemInputAsByteString 4

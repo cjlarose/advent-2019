@@ -34,4 +34,4 @@ printResults xs = (part1, part2)
     part2 = show totalFuel
 
 solve :: IO (Either String (String, String))
-solve = getProblemInputAsByteString 1 >>= pure . withSuccessfulParse modules printResults
+solve = withSuccessfulParse modules printResults <$> getProblemInputAsByteString 1

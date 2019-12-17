@@ -21,4 +21,4 @@ printResults program = (part1, part2)
     part2 = show distressSignalCoordinates
 
 solve :: IO (Either String (String, String))
-solve = getProblemInputAsByteString 9 >>= pure . withSuccessfulParse program printResults
+solve = withSuccessfulParse program printResults <$> getProblemInputAsByteString 9

@@ -28,4 +28,4 @@ printResults xs = (part1, part2)
     part2 = show $ 100 * noun + verb
 
 solve :: IO (Either String (String, String))
-solve = getProblemInputAsByteString 2 >>= pure . withSuccessfulParse program printResults
+solve = withSuccessfulParse program printResults <$> getProblemInputAsByteString 2

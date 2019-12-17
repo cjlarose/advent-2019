@@ -15,4 +15,4 @@ printResults xs = (part1, part2)
     part2 = show thermalRadiatorControllerTestDianosticCode
 
 solve :: IO (Either String (String, String))
-solve = getProblemInputAsByteString 5 >>= pure . withSuccessfulParse program printResults
+solve = withSuccessfulParse program printResults <$> getProblemInputAsByteString 5
