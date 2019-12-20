@@ -15,6 +15,7 @@ import qualified Advent2019.Day5
 import qualified Advent2019.Day7
 import qualified Advent2019.Day9
 import qualified Advent2019.Day14
+import qualified Advent2019.Day19
 
 solver :: Int -> IO (Either String (String, String))
 solver 1 = Advent2019.Day1.solve
@@ -25,6 +26,7 @@ solver 5 = Advent2019.Day5.solve
 solver 7 = Advent2019.Day7.solve
 solver 9 = Advent2019.Day9.solve
 solver 14 = Advent2019.Day14.solve
+solver 19 = Advent2019.Day19.solve
 solver n = pure . Left $ "Unknown problem " ++ show n
 
 solve :: Int -> IO (LBS.ByteString)
