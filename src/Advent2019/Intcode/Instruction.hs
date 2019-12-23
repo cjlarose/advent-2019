@@ -40,7 +40,7 @@ instruction paramTypes modes effect = do
   let operandResolvers = zipWith resolveOperand paramTypes modes
   let numParams = length paramTypes
   valuesInOperandPositions <- mapM valueAtAddress [pc + 1..pc + fromIntegral numParams]
-  operands <- zipWithM (\f x -> f x) operandResolvers valuesInOperandPositions
+  operands <- zipWithM ($) operandResolvers valuesInOperandPositions
   effect operands
 
 nonJumpInstruction :: [ParameterType] -> [ParameterMode] -> ([Integer] -> IntcodeCompute a) -> IntcodeCompute a
