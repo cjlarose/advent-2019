@@ -17,7 +17,6 @@ import Control.Monad.Writer (tell)
 import Advent2019.Intcode ( IntcodeCompute
                           , ParameterMode(..)
                           , ParameterType(..)
-                          , Operand(..)
                           )
 import Advent2019.Intcode.Machine ( valueAtAddress
                                   , writeToAddress
@@ -29,22 +28,11 @@ import Advent2019.Intcode.Machine ( valueAtAddress
                                   , updateRelativeBase
                                   )
 
-resolveValueOperand :: Operand -> IntcodeCompute Integer
-resolveValueOperand (Immediate x) = return x
-resolveValueOperand addr = resolveAddressOperand addr >>= valueAtAddress
-
-resolveAddressOperand :: Operand -> IntcodeCompute Integer
-resolveAddressOperand (Position absoluteAddr) = pure absoluteAddr
-resolveAddressOperand (Relative relativeAddr) = (+ relativeAddr) <$> getRelativeBase
-
 resolveOperand :: ParameterType -> ParameterMode -> Integer -> IntcodeCompute Integer
-resolveOperand paramType mode val = f paramType $ op mode
-  where
-    op PositionMode = Position val
-    op ImmediateMode = Immediate val
-    op RelativeMode = Relative val
-    f AddressParameter = resolveAddressOperand
-    f ValueParameter = resolveValueOperand
+resolveOperand AddressParameter PositionMode val = pure val
+resolveOperand AddressParameter RelativeMode val = (+ val) <$> getRelativeBase
+resolveOperand ValueParameter ImmediateMode val = pure val
+resolveOperand ValueParameter mode val = resolveOperand AddressParameter mode val >>= valueAtAddress
 
 instruction :: [ParameterType] -> [ParameterMode] -> ([Integer] -> IntcodeCompute a) -> IntcodeCompute a
 instruction paramTypes modes effect = do

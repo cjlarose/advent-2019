@@ -4,7 +4,6 @@ module Advent2019.Intcode
   , IntcodeCompute
   , ParameterMode(..)
   , ParameterType(..)
-  , Operand(..)
   ) where
 
 import Control.Monad.RWS (RWS)
@@ -21,4 +20,3 @@ type IntcodeCompute = RWS () [Integer] Machine
 
 data ParameterMode = PositionMode | ImmediateMode | RelativeMode deriving (Enum)
 data ParameterType = ValueParameter | AddressParameter
-data Operand = Position Integer | Immediate Integer | Relative Integer
