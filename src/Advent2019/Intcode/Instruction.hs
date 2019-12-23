@@ -39,7 +39,7 @@ resolveAddressOperand (Relative relativeAddr) = (+ relativeAddr) <$> getRelative
 instruction :: Int -> [ParameterMode] -> ([Operand] -> IntcodeCompute a) -> IntcodeCompute a
 instruction numParams modes effect = do
   pc <- readInstructionPointer
-  valuesInOperandPositions <- mapM (\p -> valueAtAddress $ pc + (fromIntegral p) + 1) [0..numParams-1]
+  valuesInOperandPositions <- mapM valueAtAddress [pc + 1..pc + fromIntegral numParams]
   let operands = zipWith (\mode -> case mode of
                                      PositionMode -> Position
                                      ImmediateMode -> Immediate
