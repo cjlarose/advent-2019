@@ -20,10 +20,12 @@ import Advent2019.Intcode.Instruction ( add
 import Advent2019.Intcode.Machine (newMachine, valueAtAddress, readInstructionPointer, getStatus)
 
 decodeInstruction :: Integer -> (Integer, [ParameterMode])
-decodeInstruction inst = (opcode, paramModes ++ repeat PositionMode)
+decodeInstruction inst = (opcode, paramModes (fromIntegral rest) ++ repeat PositionMode)
   where
     (rest, opcode) = inst `divMod` 100
-    paramModes = reverse . map (toEnum . read . pure) . show $ rest
+
+    paramModes 0 = []
+    paramModes n = let (dividend, rem) = n `divMod` 10 in toEnum rem : paramModes dividend
 
 executeOneInstruction :: IntcodeCompute ()
 executeOneInstruction = do
