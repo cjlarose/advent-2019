@@ -2,9 +2,6 @@ module Advent2019.Day19
   ( solve
   ) where
 
-import Data.List (find)
-import qualified Data.Map.Strict as Map
-import Data.Map.Strict ((!))
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Control.Monad.RWS (evalRWS)
@@ -39,30 +36,17 @@ affectedPoints machineFactory = search Set.empty $ Set.singleton (0, (0, 0))
         newQueue = Set.union neighbors (Set.delete minItem queue)
         morePoints = search (Set.insert minCoord visited) newQueue
 
-pointsByDistance :: [(Integer, Integer)]
-pointsByDistance = f 0
-  where
-    f d = [(x, y) | x <- [0..d], let y = d - x] ++ f (d + 1)
-
 santasShip :: ([Integer] -> Machine) -> (Integer, Integer)
-santasShip machineFactory = findInBeam pointsByDistance Map.empty
+santasShip machineFactory = search (affectedPoints machineFactory) Set.empty
   where
-    findInBeam (p:ps) cache = if newCache ! p
-                              then (if canHoldSantasShip
-                                    then p
-                                    else findInBeam ps newNewCache)
-                              else findInBeam ps newCache
+    search (p:ps) visited = if bottomRightOfShip
+                            then topLeftOfShip
+                            else search ps $ Set.insert p visited
       where
-        queryBeam :: Map.Map (Integer, Integer) Bool -> (Integer, Integer) -> Map.Map (Integer, Integer) Bool
-        queryBeam m p = if p `Map.member` m
-                        then m
-                        else Map.insert p (pulledByTractorBeam machineFactory p) m
-
-        newCache = queryBeam cache p
-        (x0, y0) = p
-        neighbors = [(x, y) | x <- [x0..x0+99], y <- [y0..y0+99]]
-        newNewCache = foldr (flip queryBeam) newCache neighbors
-        canHoldSantasShip = all (newNewCache !) neighbors
+        (x, y) = p
+        seen p0 = Set.member p0 visited
+        bottomRightOfShip = seen (x - 50, y) && seen (x, y - 50)
+        topLeftOfShip = (x - 50, y - 50)
 
 printResults :: [Integer] -> (String, String)
 printResults program = (part1, part2)
@@ -70,7 +54,7 @@ printResults program = (part1, part2)
     machineFactory = newMachine program
     numPoints = length . filter (\(x, y) -> x < 50 && y < 50) . takeWhile (\p -> norm p <= norm (49, 49)) . affectedPoints $ machineFactory
     part1 = show numPoints
-    -- (x, y) = santasShip program
+    -- (x, y) = santasShip machineFactory
     -- part2 = show $ x * 10000 + y
     part2 = "not yet implemented"
 
