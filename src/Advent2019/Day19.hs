@@ -1,11 +1,12 @@
 module Advent2019.Day19
   ( solve
-  , pointsByDistance
   ) where
 
 import Data.List (find)
 import qualified Data.Map.Strict as Map
 import Data.Map.Strict ((!))
+import Data.Set (Set)
+import qualified Data.Set as Set
 
 import Advent2019.Input (getProblemInputAsByteString, withSuccessfulParse)
 import Advent2019.Intcode.Parse (program)
@@ -14,10 +15,23 @@ import Advent2019.Intcode.Execute (runMachineWithInput)
 pulledByTractorBeam :: [Integer] -> (Integer, Integer) -> Bool
 pulledByTractorBeam program (x, y) = (1 ==) . head . runMachineWithInput program $ [x, y]
 
+norm :: (Floating a1, Integral a2, Integral a3) => (a2, a3) -> a1
+norm (x0, y0) = sqrt $ fromIntegral x0 ^ 2 + fromIntegral y0 ^ 2
+
 affectedPoints :: [Integer] -> [(Integer, Integer)]
-affectedPoints program = filter (pulledByTractorBeam program) pointsToTest
+affectedPoints program = search Set.empty $ Set.singleton (0, (0, 0))
   where
-    pointsToTest = [(x, y) | x <- [0..49], y <- [0..49]]
+    search visited queue = if pulled
+                           then minCoord : morePoints
+                           else morePoints
+      where
+        minItem = Set.findMin queue
+        (_, minCoord) = minItem
+        (x, y) = minCoord
+        pulled = not (minCoord `Set.member` visited) && pulledByTractorBeam program minCoord
+        neighbors = Set.fromList $ map (\p -> (norm p, p)) [(x + 1, y), (x, y + 1)]
+        newQueue = Set.union neighbors (Set.delete minItem queue)
+        morePoints = search (Set.insert minCoord visited) newQueue
 
 pointsByDistance :: [(Integer, Integer)]
 pointsByDistance = f 0
@@ -47,7 +61,7 @@ santasShip program = findInBeam pointsByDistance Map.empty
 printResults :: [Integer] -> (String, String)
 printResults program = (part1, part2)
   where
-    numPoints = length . affectedPoints $ program
+    numPoints = length . filter (\(x, y) -> x < 50 && y < 50) . takeWhile (\p -> norm p <= norm (49, 49)) . affectedPoints $ program
     part1 = show numPoints
     -- (x, y) = santasShip program
     -- part2 = show $ x * 10000 + y
