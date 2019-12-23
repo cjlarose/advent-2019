@@ -11,11 +11,12 @@ module Advent2019.Intcode.Instruction
   , halt
   ) where
 
-import Control.Monad (liftM2)
+import Control.Monad (zipWithM)
 import Control.Monad.Writer (tell)
 
 import Advent2019.Intcode ( IntcodeCompute
                           , ParameterMode(..)
+                          , ParameterType(..)
                           , Operand(..)
                           )
 import Advent2019.Intcode.Machine ( valueAtAddress
@@ -36,28 +37,32 @@ resolveAddressOperand :: Operand -> IntcodeCompute Integer
 resolveAddressOperand (Position absoluteAddr) = pure absoluteAddr
 resolveAddressOperand (Relative relativeAddr) = (+ relativeAddr) <$> getRelativeBase
 
-instruction :: Int -> [ParameterMode] -> ([Operand] -> IntcodeCompute a) -> IntcodeCompute a
-instruction numParams modes effect = do
+resolveOperand :: ParameterType -> ParameterMode -> Integer -> IntcodeCompute Integer
+resolveOperand paramType mode val = f paramType $ op mode
+  where
+    op PositionMode = Position val
+    op ImmediateMode = Immediate val
+    op RelativeMode = Relative val
+    f AddressParameter = resolveAddressOperand
+    f ValueParameter = resolveValueOperand
+
+instruction :: [ParameterType] -> [ParameterMode] -> ([Integer] -> IntcodeCompute a) -> IntcodeCompute a
+instruction paramTypes modes effect = do
   pc <- readInstructionPointer
+  let operandResolvers = zipWith resolveOperand paramTypes modes
+  let numParams = length paramTypes
   valuesInOperandPositions <- mapM valueAtAddress [pc + 1..pc + fromIntegral numParams]
-  let operands = zipWith (\mode -> case mode of
-                                     PositionMode -> Position
-                                     ImmediateMode -> Immediate
-                                     RelativeMode -> Relative)
-                         modes
-                         valuesInOperandPositions
+  operands <- zipWithM (\f x -> f x) operandResolvers valuesInOperandPositions
   effect operands
 
-nonJumpInstruction :: Int -> [ParameterMode] -> ([Operand] -> IntcodeCompute a) -> IntcodeCompute a
-nonJumpInstruction numParams modes effect = instruction numParams modes effect <* updateInstructionPointer (+ (fromIntegral $ numParams + 1))
+nonJumpInstruction :: [ParameterType] -> [ParameterMode] -> ([Integer] -> IntcodeCompute a) -> IntcodeCompute a
+nonJumpInstruction paramTypes modes effect = instruction paramTypes modes effect <* updateInstructionPointer (+ (fromIntegral $ numParams + 1))
+  where numParams = length paramTypes
 
 binaryOp :: (Integer -> Integer -> Integer) -> [ParameterMode] -> IntcodeCompute ()
-binaryOp f modes = nonJumpInstruction 3 modes execute
+binaryOp f modes = nonJumpInstruction [ValueParameter, ValueParameter, AddressParameter] modes execute
   where
-    execute [a1, a2, destAddr] = do
-      result <- liftM2 f (resolveValueOperand a1) (resolveValueOperand a2)
-      addr <- resolveAddressOperand destAddr
-      writeToAddress addr result
+    execute [a1, a2, destAddr] = writeToAddress destAddr $ f a1 a2
 
 add :: [ParameterMode] -> IntcodeCompute ()
 add = binaryOp (+)
@@ -66,34 +71,27 @@ multiply :: [ParameterMode] -> IntcodeCompute ()
 multiply = binaryOp (*)
 
 readInputOp :: [ParameterMode] -> IntcodeCompute ()
-readInputOp modes = nonJumpInstruction 1 modes execute
+readInputOp modes = nonJumpInstruction [AddressParameter] modes execute
   where
-    execute [destAddr] = do
-      val <- readInput
-      addr <- resolveAddressOperand destAddr
-      writeToAddress addr val
+    execute [destAddr] = readInput >>= writeToAddress destAddr
 
 writeOutput :: [ParameterMode] -> IntcodeCompute ()
-writeOutput modes = nonJumpInstruction 1 modes execute
+writeOutput modes = nonJumpInstruction [ValueParameter] modes execute
   where
-    execute (operand:[]) = resolveValueOperand operand >>= tell . pure
+    execute [operand] = tell . pure $ operand
 
 jumpIfTrue :: [ParameterMode] -> IntcodeCompute ()
-jumpIfTrue modes = instruction 2 modes execute
+jumpIfTrue modes = instruction [ValueParameter, ValueParameter] modes execute
   where
-    execute [a1, a2] = do
-      operand1 <- resolveValueOperand a1
-      operand2 <- resolveValueOperand a2
+    execute [operand1, operand2] =
       if operand1 /= 0
       then updateInstructionPointer (const operand2)
       else updateInstructionPointer (+ 3)
 
 jumpIfFalse :: [ParameterMode] -> IntcodeCompute ()
-jumpIfFalse modes = instruction 2 modes execute
+jumpIfFalse modes = instruction [ValueParameter, ValueParameter] modes execute
   where
-    execute [a1, a2] = do
-      operand1 <- resolveValueOperand a1
-      operand2 <- resolveValueOperand a2
+    execute [operand1, operand2] =
       if operand1 == 0
       then updateInstructionPointer (const operand2)
       else updateInstructionPointer (+ 3)
@@ -105,9 +103,9 @@ equals :: [ParameterMode] -> IntcodeCompute ()
 equals = binaryOp (\a b -> fromIntegral . fromEnum $ a == b)
 
 adjustRelativeBase :: [ParameterMode] -> IntcodeCompute ()
-adjustRelativeBase modes = nonJumpInstruction 1 modes execute
+adjustRelativeBase modes = nonJumpInstruction [ValueParameter] modes execute
   where
-    execute [a1] = resolveValueOperand a1 >>= updateRelativeBase
+    execute [a1] = updateRelativeBase a1
 
 halt :: [ParameterMode] -> IntcodeCompute ()
-halt _ = instruction 0 [] . const $ setTerminated
+halt _ = instruction [] [] . const $ setTerminated
