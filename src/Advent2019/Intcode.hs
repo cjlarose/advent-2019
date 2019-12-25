@@ -7,12 +7,13 @@ module Advent2019.Intcode
   , ParameterType(..)
   ) where
 
+import Data.Int (Int64)
 import Control.Monad.RWS (RWS)
 import qualified Data.HashMap.Strict as Map
 import Data.HashMap.Strict (HashMap)
 
 data MachineState = Running | Terminated
-type TapeSymbol = Integer
+type TapeSymbol = Int64
 data Machine = Machine
   { instructionPointer :: TapeSymbol
   , relativeBase :: TapeSymbol
