@@ -33,7 +33,8 @@ resolveOperand :: ParameterType -> ParameterMode -> TapeSymbol -> IntcodeCompute
 resolveOperand AddressParameter PositionMode val = pure val
 resolveOperand AddressParameter RelativeMode val = (+ val) <$> getRelativeBase
 resolveOperand ValueParameter ImmediateMode val = pure val
-resolveOperand ValueParameter mode val = resolveOperand AddressParameter mode val >>= valueAtAddress
+resolveOperand ValueParameter PositionMode val = valueAtAddress val
+resolveOperand ValueParameter RelativeMode val = getRelativeBase >>= valueAtAddress . (+ val)
 
 instruction :: [ParameterType] -> [ParameterMode] -> ([TapeSymbol] -> IntcodeCompute a) -> IntcodeCompute a
 instruction paramTypes modes effect = do
