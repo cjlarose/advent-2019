@@ -5,6 +5,7 @@ module Advent2019.Intcode.Execute
   ) where
 
 import Control.Monad.RWS (evalRWS)
+import Data.List (iterate')
 
 import Advent2019.Intcode (TapeSymbol, IntcodeCompute, MachineState(..), ParameterMode(..))
 import Advent2019.Intcode.Instruction ( add
@@ -20,12 +21,10 @@ import Advent2019.Intcode.Instruction ( add
 import Advent2019.Intcode.Machine (newMachine, valueAtAddress, readInstructionPointer, getStatus)
 
 decodeInstruction :: TapeSymbol -> (TapeSymbol, [ParameterMode])
-decodeInstruction inst = (opcode, paramModes (fromIntegral rest) ++ repeat PositionMode)
+decodeInstruction inst = (opcode, paramModes)
   where
     (rest, opcode) = inst `divMod` 100
-
-    paramModes 0 = []
-    paramModes n = let (dividend, rem) = n `divMod` 10 in toEnum rem : paramModes dividend
+    paramModes = map (toEnum . (`mod` 10)) . iterate' (`div` 10) . fromIntegral $ rest
 
 executeOneInstruction :: IntcodeCompute ()
 executeOneInstruction = do
