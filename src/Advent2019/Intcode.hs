@@ -9,7 +9,6 @@ module Advent2019.Intcode
 
 import Data.Int (Int64)
 import Control.Monad.RWS (RWS)
-import qualified Data.HashMap.Strict as Map
 import Data.HashMap.Strict (HashMap)
 
 data MachineState = Running | Terminated
