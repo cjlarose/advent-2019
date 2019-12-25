@@ -15,6 +15,7 @@ import Control.Monad (zipWithM)
 import Control.Monad.Writer (tell)
 
 import Advent2019.Intcode ( IntcodeCompute
+                          , TapeSymbol
                           , ParameterMode(..)
                           , ParameterType(..)
                           )
@@ -28,13 +29,13 @@ import Advent2019.Intcode.Machine ( valueAtAddress
                                   , updateRelativeBase
                                   )
 
-resolveOperand :: ParameterType -> ParameterMode -> Integer -> IntcodeCompute Integer
+resolveOperand :: ParameterType -> ParameterMode -> TapeSymbol -> IntcodeCompute TapeSymbol
 resolveOperand AddressParameter PositionMode val = pure val
 resolveOperand AddressParameter RelativeMode val = (+ val) <$> getRelativeBase
 resolveOperand ValueParameter ImmediateMode val = pure val
 resolveOperand ValueParameter mode val = resolveOperand AddressParameter mode val >>= valueAtAddress
 
-instruction :: [ParameterType] -> [ParameterMode] -> ([Integer] -> IntcodeCompute a) -> IntcodeCompute a
+instruction :: [ParameterType] -> [ParameterMode] -> ([TapeSymbol] -> IntcodeCompute a) -> IntcodeCompute a
 instruction paramTypes modes effect = do
   pc <- readInstructionPointer
   let operandResolvers = zipWith resolveOperand paramTypes modes
@@ -43,11 +44,11 @@ instruction paramTypes modes effect = do
   operands <- zipWithM ($) operandResolvers valuesInOperandPositions
   effect operands
 
-nonJumpInstruction :: [ParameterType] -> [ParameterMode] -> ([Integer] -> IntcodeCompute a) -> IntcodeCompute a
+nonJumpInstruction :: [ParameterType] -> [ParameterMode] -> ([TapeSymbol] -> IntcodeCompute a) -> IntcodeCompute a
 nonJumpInstruction paramTypes modes effect = instruction paramTypes modes effect <* updateInstructionPointer (+ (fromIntegral $ numParams + 1))
   where numParams = length paramTypes
 
-binaryOp :: (Integer -> Integer -> Integer) -> [ParameterMode] -> IntcodeCompute ()
+binaryOp :: (TapeSymbol -> TapeSymbol -> TapeSymbol) -> [ParameterMode] -> IntcodeCompute ()
 binaryOp f modes = nonJumpInstruction [ValueParameter, ValueParameter, AddressParameter] modes execute
   where
     execute [a1, a2, destAddr] = writeToAddress destAddr $ f a1 a2

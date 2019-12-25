@@ -7,12 +7,13 @@ import qualified Data.Set as Set
 import Control.Monad.RWS (evalRWS)
 
 import Advent2019.Input (getProblemInputAsByteString, withSuccessfulParse)
+import Advent2019.Intcode (TapeSymbol)
 import Advent2019.Intcode.Parse (program)
 import Advent2019.Intcode.Execute (runMachineWithInput, runMachine)
 import Advent2019.Intcode.Machine (newMachine)
 import Advent2019.Intcode (Machine)
 
-pulledByTractorBeam :: ([Integer] -> Machine) -> (Integer, Integer) -> Bool
+pulledByTractorBeam :: ([TapeSymbol] -> Machine) -> (TapeSymbol, TapeSymbol) -> Bool
 pulledByTractorBeam machineFactory (x, y) = (1 ==) . head . snd . evalRWS runMachine () $ machine
   where
     machine :: Machine
@@ -21,7 +22,7 @@ pulledByTractorBeam machineFactory (x, y) = (1 ==) . head . snd . evalRWS runMac
 norm :: (Floating a1, Integral a2, Integral a3) => (a2, a3) -> a1
 norm (x0, y0) = sqrt $ fromIntegral x0 ^ 2 + fromIntegral y0 ^ 2
 
-affectedPoints :: ([Integer] -> Machine) -> [(Integer, Integer)]
+affectedPoints :: ([TapeSymbol] -> Machine) -> [(TapeSymbol, TapeSymbol)]
 affectedPoints machineFactory = search Set.empty $ Set.singleton (0, (0, 0))
   where
     search visited queue = if pulled
@@ -36,7 +37,7 @@ affectedPoints machineFactory = search Set.empty $ Set.singleton (0, (0, 0))
         newQueue = Set.union neighbors (Set.delete minItem queue)
         morePoints = search (Set.insert minCoord visited) newQueue
 
-santasShip :: ([Integer] -> Machine) -> (Integer, Integer)
+santasShip :: ([TapeSymbol] -> Machine) -> (TapeSymbol, TapeSymbol)
 santasShip machineFactory = search (affectedPoints machineFactory) Set.empty
   where
     search (p:ps) visited = if bottomRightOfShip
@@ -48,7 +49,7 @@ santasShip machineFactory = search (affectedPoints machineFactory) Set.empty
         bottomRightOfShip = seen (x - 50, y) && seen (x, y - 50)
         topLeftOfShip = (x - 50, y - 50)
 
-printResults :: [Integer] -> (String, String)
+printResults :: [TapeSymbol] -> (String, String)
 printResults program = (part1, part2)
   where
     machineFactory = newMachine program

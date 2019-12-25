@@ -7,12 +7,13 @@ module Advent2019.Day7
 import Data.List (permutations)
 
 import Advent2019.Input (getProblemInputAsByteString, withSuccessfulParse)
+import Advent2019.Intcode (TapeSymbol)
 import Advent2019.Intcode.Parse (program)
 import Advent2019.Intcode.Execute (runMachineWithInput)
 
-type PhaseSettings = (Integer, Integer, Integer, Integer, Integer)
+type PhaseSettings = (TapeSymbol, TapeSymbol, TapeSymbol, TapeSymbol, TapeSymbol)
 
-trySettings :: [Integer] -> PhaseSettings -> Integer
+trySettings :: [TapeSymbol] -> PhaseSettings -> TapeSymbol
 trySettings xs (a,b,c,d,e) = last outputE
   where
     amp = runMachineWithInput xs
@@ -22,12 +23,12 @@ trySettings xs (a,b,c,d,e) = last outputE
     outputD = amp (d : outputC)
     outputE = amp (e : outputD)
 
-highestSignal :: [Integer] -> Integer
+highestSignal :: [TapeSymbol] -> TapeSymbol
 highestSignal xs = maximum $ map (trySettings xs) possibleSettings
   where
     possibleSettings = [(a, b, c, d, e) | (a:b:c:d:e:[]) <- permutations [0..4]]
 
-trySettingsWithFeedback :: [Integer] -> PhaseSettings -> Integer
+trySettingsWithFeedback :: [TapeSymbol] -> PhaseSettings -> TapeSymbol
 trySettingsWithFeedback xs (a,b,c,d,e) = last outputE
   where
     amp = runMachineWithInput xs
@@ -37,12 +38,12 @@ trySettingsWithFeedback xs (a,b,c,d,e) = last outputE
     outputD = amp (d : outputC)
     outputE = amp (e : outputD)
 
-highestSignalWithFeedback :: [Integer] -> Integer
+highestSignalWithFeedback :: [TapeSymbol] -> TapeSymbol
 highestSignalWithFeedback xs = maximum $ map (trySettingsWithFeedback xs) possibleSettings
   where
     possibleSettings = [(a, b, c, d, e) | (a:b:c:d:e:[]) <- permutations [5..9]]
 
-printResults :: [Integer] -> (String, String)
+printResults :: [TapeSymbol] -> (String, String)
 printResults xs = (part1, part2)
   where
     signal = highestSignal xs

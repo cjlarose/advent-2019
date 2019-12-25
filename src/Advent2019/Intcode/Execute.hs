@@ -6,7 +6,7 @@ module Advent2019.Intcode.Execute
 
 import Control.Monad.RWS (evalRWS)
 
-import Advent2019.Intcode (IntcodeCompute, MachineState(..), ParameterMode(..))
+import Advent2019.Intcode (TapeSymbol, IntcodeCompute, MachineState(..), ParameterMode(..))
 import Advent2019.Intcode.Instruction ( add
                                       , multiply
                                       , readInputOp
@@ -19,7 +19,7 @@ import Advent2019.Intcode.Instruction ( add
                                       , halt)
 import Advent2019.Intcode.Machine (newMachine, valueAtAddress, readInstructionPointer, getStatus)
 
-decodeInstruction :: Integer -> (Integer, [ParameterMode])
+decodeInstruction :: TapeSymbol -> (TapeSymbol, [ParameterMode])
 decodeInstruction inst = (opcode, paramModes (fromIntegral rest) ++ repeat PositionMode)
   where
     (rest, opcode) = inst `divMod` 100
@@ -52,8 +52,8 @@ runMachine = do
     Terminated -> return ()
     Running -> executeOneInstruction >> runMachine
 
-withMachine :: [Integer] -> [Integer] -> IntcodeCompute a -> (a, [Integer])
+withMachine :: [TapeSymbol] -> [TapeSymbol] -> IntcodeCompute a -> (a, [TapeSymbol])
 withMachine program input action = evalRWS action () (newMachine program input)
 
-runMachineWithInput :: [Integer] -> [Integer] -> [Integer]
+runMachineWithInput :: [TapeSymbol] -> [TapeSymbol] -> [TapeSymbol]
 runMachineWithInput program input = snd $ withMachine program input runMachine

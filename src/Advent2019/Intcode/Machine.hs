@@ -14,9 +14,9 @@ module Advent2019.Intcode.Machine
 import Control.Monad.State (gets, put, modify)
 import qualified Data.HashMap.Strict as Map
 
-import Advent2019.Intcode (IntcodeCompute, instructionPointer, Machine(..), MachineState(..))
+import Advent2019.Intcode (TapeSymbol, IntcodeCompute, instructionPointer, Machine(..), MachineState(..))
 
-newMachine :: [Integer] -> [Integer] -> Machine
+newMachine :: [TapeSymbol] -> [TapeSymbol] -> Machine
 newMachine program input = Machine { instructionPointer = 0
                                    , relativeBase = 0
                                    , memory = tape
@@ -26,25 +26,25 @@ newMachine program input = Machine { instructionPointer = 0
   where
     tape = Map.fromList . zip [0..] $ program
 
-updateMemory :: [(Integer, Integer)] -> IntcodeCompute ()
+updateMemory :: [(TapeSymbol, TapeSymbol)] -> IntcodeCompute ()
 updateMemory updates = do
   currentMemory <- gets memory
   let newMemory = foldr (uncurry Map.insert) currentMemory updates
   modify (\x -> x { memory = newMemory })
 
-writeToAddress :: Integer -> Integer -> IntcodeCompute ()
+writeToAddress :: TapeSymbol -> TapeSymbol -> IntcodeCompute ()
 writeToAddress addr val = updateMemory [(addr, val)]
 
-valueAtAddress :: Integer -> IntcodeCompute Integer
+valueAtAddress :: TapeSymbol -> IntcodeCompute TapeSymbol
 valueAtAddress addr = Map.lookupDefault 0 addr <$> gets memory
 
-readInput :: IntcodeCompute Integer
+readInput :: IntcodeCompute TapeSymbol
 readInput = (head <$> gets input) <* modify (\x -> x { input = tail . input $ x })
 
-readInstructionPointer :: IntcodeCompute Integer
+readInstructionPointer :: IntcodeCompute TapeSymbol
 readInstructionPointer = gets instructionPointer
 
-updateInstructionPointer :: (Integer -> Integer) -> IntcodeCompute ()
+updateInstructionPointer :: (TapeSymbol -> TapeSymbol) -> IntcodeCompute ()
 updateInstructionPointer f = modify (\x -> x { instructionPointer = f $ instructionPointer x })
 
 getStatus :: IntcodeCompute MachineState
@@ -53,8 +53,8 @@ getStatus = gets state
 setTerminated :: IntcodeCompute ()
 setTerminated =  modify (\m -> m { state = Terminated })
 
-getRelativeBase :: IntcodeCompute Integer
+getRelativeBase :: IntcodeCompute TapeSymbol
 getRelativeBase = gets relativeBase
 
-updateRelativeBase :: Integer -> IntcodeCompute ()
+updateRelativeBase :: TapeSymbol -> IntcodeCompute ()
 updateRelativeBase d = modify (\m -> m { relativeBase = relativeBase m + d })

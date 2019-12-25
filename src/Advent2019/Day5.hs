@@ -3,10 +3,11 @@ module Advent2019.Day5
   ) where
 
 import Advent2019.Input (getProblemInputAsByteString, withSuccessfulParse)
+import Advent2019.Intcode (TapeSymbol)
 import Advent2019.Intcode.Parse (program)
 import Advent2019.Intcode.Execute (runMachineWithInput)
 
-printResults :: [Integer] -> (String, String)
+printResults :: [TapeSymbol] -> (String, String)
 printResults xs = (part1, part2)
   where
     airConditionerTestOutput = runMachineWithInput xs [1]
