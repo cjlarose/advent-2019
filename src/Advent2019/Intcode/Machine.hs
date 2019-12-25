@@ -12,7 +12,7 @@ module Advent2019.Intcode.Machine
   ) where
 
 import Control.Monad.State (gets, put, modify)
-import qualified Data.Map.Strict as Map
+import qualified Data.HashMap.Strict as Map
 
 import Advent2019.Intcode (IntcodeCompute, instructionPointer, Machine(..), MachineState(..))
 
@@ -36,7 +36,7 @@ writeToAddress :: Integer -> Integer -> IntcodeCompute ()
 writeToAddress addr val = updateMemory [(addr, val)]
 
 valueAtAddress :: Integer -> IntcodeCompute Integer
-valueAtAddress addr = Map.findWithDefault 0 addr <$> gets memory
+valueAtAddress addr = Map.lookupDefault 0 addr <$> gets memory
 
 readInput :: IntcodeCompute Integer
 readInput = (head <$> gets input) <* modify (\x -> x { input = tail . input $ x })
