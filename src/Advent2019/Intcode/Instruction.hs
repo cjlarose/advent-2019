@@ -11,7 +11,7 @@ module Advent2019.Intcode.Instruction
   , halt
   ) where
 
-import Control.Monad (zipWithM)
+import Control.Monad (forM)
 import Control.Monad.Writer (tell)
 
 import Advent2019.Intcode ( IntcodeCompute
@@ -39,10 +39,9 @@ resolveOperand ValueParameter RelativeMode val = getRelativeBase >>= valueAtAddr
 instruction :: [ParameterType] -> [ParameterMode] -> ([TapeSymbol] -> IntcodeCompute a) -> IntcodeCompute a
 instruction paramTypes modes effect = do
   pc <- readInstructionPointer
-  let operandResolvers = zipWith resolveOperand paramTypes modes
-  let numParams = length paramTypes
-  valuesInOperandPositions <- mapM valueAtAddress [pc + 1..pc + fromIntegral numParams]
-  operands <- zipWithM ($) operandResolvers valuesInOperandPositions
+  operands <- forM (zip3 paramTypes modes [pc + 1..]) (\(paramType, mode, addr) -> do
+    val <- valueAtAddress addr
+    resolveOperand paramType mode val)
   effect operands
 
 nonJumpInstruction :: [ParameterType] -> [ParameterMode] -> ([TapeSymbol] -> IntcodeCompute a) -> IntcodeCompute a
