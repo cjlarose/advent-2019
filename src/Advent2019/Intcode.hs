@@ -9,14 +9,14 @@ module Advent2019.Intcode
 
 import Data.Int (Int64)
 import Control.Monad.RWS (RWS)
-import Data.HashMap.Strict (HashMap)
+import Data.Vector.Unboxed (Vector)
 
 data MachineState = Running | Terminated
 type TapeSymbol = Int64
 data Machine = Machine
   { instructionPointer :: TapeSymbol
   , relativeBase :: TapeSymbol
-  , memory :: HashMap TapeSymbol TapeSymbol
+  , memory :: Vector TapeSymbol
   , input :: [TapeSymbol]
   , state :: MachineState }
 type IntcodeCompute = RWS () [TapeSymbol] Machine
