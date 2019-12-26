@@ -12,7 +12,6 @@ module Advent2019.Intcode.Instruction
   ) where
 
 import Control.Monad (forM, liftM2, join)
-import Control.Monad.Writer (tell)
 
 import Advent2019.Intcode ( IntcodeCompute
                           , TapeSymbol
@@ -22,6 +21,7 @@ import Advent2019.Intcode ( IntcodeCompute
 import Advent2019.Intcode.Machine ( valueAtAddress
                                   , writeToAddress
                                   , readInput
+                                  , emitOutput
                                   , readInstructionPointer
                                   , updateInstructionPointer
                                   , setTerminated
@@ -65,7 +65,7 @@ readInputOp modes = nonJumpInstruction [AddressParameter] modes execute
 writeOutput :: [ParameterMode] -> IntcodeCompute ()
 writeOutput modes = nonJumpInstruction [ValueParameter] modes execute
   where
-    execute [operand] = tell . pure $ operand
+    execute [operand] = emitOutput operand
 
 jumpIfTrue :: [ParameterMode] -> IntcodeCompute ()
 jumpIfTrue modes = instruction [ValueParameter, ValueParameter] modes execute

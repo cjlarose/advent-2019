@@ -2,6 +2,7 @@ module Advent2019.Intcode.Machine
   ( writeToAddress
   , valueAtAddress
   , readInput
+  , emitOutput
   , readInstructionPointer
   , updateInstructionPointer
   , newMachine
@@ -12,6 +13,7 @@ module Advent2019.Intcode.Machine
   ) where
 
 import Control.Monad.State (gets, put, modify)
+import Control.Monad.Writer (tell)
 import Data.Vector.Unboxed (Vector, fromList, (//), (!))
 import qualified Data.Vector.Unboxed as Vector
 
@@ -51,6 +53,9 @@ valueAtAddress addr = go <$> gets memory
 
 readInput :: IntcodeCompute TapeSymbol
 readInput = (head <$> gets input) <* modify (\x -> x { input = tail . input $ x })
+
+emitOutput :: TapeSymbol -> IntcodeCompute ()
+emitOutput = tell . pure
 
 readInstructionPointer :: IntcodeCompute TapeSymbol
 readInstructionPointer = gets instructionPointer
