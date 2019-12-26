@@ -8,11 +8,10 @@ import qualified Data.Set as Set
 import Control.Monad.RWS (evalRWS)
 
 import Advent2019.Input (getProblemInputAsByteString, withSuccessfulParse)
-import Advent2019.Intcode (TapeSymbol)
+import Advent2019.Intcode (TapeSymbol, Machine)
 import Advent2019.Intcode.Parse (program)
 import Advent2019.Intcode.Execute (runMachineWithInput, runMachine)
 import Advent2019.Intcode.Machine (newMachine)
-import Advent2019.Intcode (Machine)
 
 pulledByTractorBeam :: ([TapeSymbol] -> Machine) -> (TapeSymbol, TapeSymbol) -> Bool
 pulledByTractorBeam machineFactory (x, y) = (1 ==) . head . snd . evalRWS runMachine () $ machine
