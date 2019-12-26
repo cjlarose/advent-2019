@@ -46,7 +46,7 @@ writeToAddress addr val = updateMemory go
 valueAtAddress :: TapeSymbol -> IntcodeCompute TapeSymbol
 valueAtAddress addr = go <$> gets memory
   where
-    go mem | fromIntegral addr < Vector.length mem = mem ! fromIntegral addr
+    go mem | fromIntegral addr < Vector.length mem = Vector.unsafeIndex mem $ fromIntegral addr
            | otherwise = 0
 
 readInput :: IntcodeCompute TapeSymbol
