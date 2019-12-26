@@ -12,7 +12,7 @@ module Advent2019.Intcode.Machine
   ) where
 
 import Control.Monad.State (gets, put, modify)
-import Data.Vector.Unboxed (fromList, (//), (!))
+import Data.Vector.Unboxed (Vector, fromList, (//), (!))
 import qualified Data.Vector.Unboxed as Vector
 
 import Advent2019.Intcode (TapeSymbol, IntcodeCompute, instructionPointer, Machine(..), MachineState(..))
@@ -27,15 +27,21 @@ newMachine program input = Machine { instructionPointer = 0
   where
     tape = fromList program
 
-writeToAddress :: TapeSymbol -> TapeSymbol -> IntcodeCompute ()
-writeToAddress addr val = do
+updateMemory :: (Vector TapeSymbol -> Vector TapeSymbol) -> IntcodeCompute ()
+updateMemory f = do
   mem <- gets memory
-  let oldLength = Vector.length mem
-  let newLength = fromIntegral addr + 1
-  let diffLength = newLength - oldLength
-  let grownMemory = mem Vector.++ Vector.replicate diffLength 0
-  let newMem = grownMemory // [(fromIntegral addr, val)]
-  modify (\x -> x { memory = newMem })
+  modify (\x -> x { memory = f mem })
+
+writeToAddress :: TapeSymbol -> TapeSymbol -> IntcodeCompute ()
+writeToAddress addr val = updateMemory go
+  where
+    go mem = newMem
+      where
+        oldLength = Vector.length mem
+        newLength = fromIntegral addr + 1
+        diffLength = newLength - oldLength
+        grownMemory = mem Vector.++ Vector.replicate diffLength 0
+        newMem = grownMemory // [(fromIntegral addr, val)]
 
 valueAtAddress :: TapeSymbol -> IntcodeCompute TapeSymbol
 valueAtAddress addr = go <$> gets memory
