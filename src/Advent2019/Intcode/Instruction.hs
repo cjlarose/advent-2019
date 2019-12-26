@@ -11,7 +11,7 @@ module Advent2019.Intcode.Instruction
   , halt
   ) where
 
-import Control.Monad (forM)
+import Control.Monad (forM, liftM2, join)
 import Control.Monad.Writer (tell)
 
 import Advent2019.Intcode ( IntcodeCompute
@@ -30,18 +30,16 @@ import Advent2019.Intcode.Machine ( valueAtAddress
                                   )
 
 resolveOperand :: ParameterType -> ParameterMode -> TapeSymbol -> IntcodeCompute TapeSymbol
-resolveOperand AddressParameter PositionMode val = pure val
-resolveOperand AddressParameter RelativeMode val = (+ val) <$> getRelativeBase
-resolveOperand ValueParameter ImmediateMode val = pure val
-resolveOperand ValueParameter PositionMode val = valueAtAddress val
-resolveOperand ValueParameter RelativeMode val = getRelativeBase >>= valueAtAddress . (+ val)
+resolveOperand AddressParameter PositionMode addr = valueAtAddress addr
+resolveOperand AddressParameter RelativeMode addr = liftM2 (+) getRelativeBase $ valueAtAddress addr
+resolveOperand ValueParameter ImmediateMode addr = valueAtAddress addr
+resolveOperand ValueParameter PositionMode addr = valueAtAddress addr >>= valueAtAddress
+resolveOperand ValueParameter RelativeMode addr = join $ liftM2 (\a b -> valueAtAddress $ a + b) (valueAtAddress addr) getRelativeBase
 
 instruction :: [ParameterType] -> [ParameterMode] -> ([TapeSymbol] -> IntcodeCompute a) -> IntcodeCompute a
 instruction paramTypes modes effect = do
   pc <- readInstructionPointer
-  operands <- forM (zip3 paramTypes modes [pc + 1..]) (\(paramType, mode, addr) -> do
-    val <- valueAtAddress addr
-    resolveOperand paramType mode val)
+  operands <- forM (zip3 paramTypes modes [pc + 1..]) (\(paramType, mode, addr) -> resolveOperand paramType mode addr)
   effect operands
 
 nonJumpInstruction :: [ParameterType] -> [ParameterMode] -> ([TapeSymbol] -> IntcodeCompute a) -> IntcodeCompute a
