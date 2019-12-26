@@ -2,6 +2,7 @@ module Advent2019.Intcode.Execute
   ( withMachine
   , runMachine
   , runMachineWithInput
+  , decodeInstruction
   ) where
 
 import Control.Monad.RWS (evalRWS)

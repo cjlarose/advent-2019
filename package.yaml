@@ -26,6 +26,7 @@ dependencies:
 - binary-search
 - bytestring
 - containers
+- criterion
 - mtl
 - parsec
 - unordered-containers
@@ -37,6 +38,15 @@ executables:
   advent2019-exe:
     main:                Main.hs
     source-dirs:         app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - advent2019
+  advent2019-bench:
+    main:                Main.hs
+    source-dirs:         bench
     ghc-options:
     - -threaded
     - -rtsopts
