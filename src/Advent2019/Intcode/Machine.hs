@@ -35,13 +35,13 @@ updateMemory f = do
 writeToAddress :: TapeSymbol -> TapeSymbol -> IntcodeCompute ()
 writeToAddress addr val = updateMemory go
   where
-    go mem = newMem
+    go mem | fromIntegral addr < Vector.length mem = Vector.unsafeUpd mem [(fromIntegral addr, val)]
+           | otherwise = grownMemory // [(fromIntegral addr, val)]
       where
         oldLength = Vector.length mem
         newLength = fromIntegral addr + 1
         diffLength = newLength - oldLength
         grownMemory = mem Vector.++ Vector.replicate diffLength 0
-        newMem = grownMemory // [(fromIntegral addr, val)]
 
 valueAtAddress :: TapeSymbol -> IntcodeCompute TapeSymbol
 valueAtAddress addr = go <$> gets memory
