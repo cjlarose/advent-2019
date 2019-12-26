@@ -1,7 +1,12 @@
 module Main where
 
-import Advent2019.Intcode (TapeSymbol, ParameterMode)
-import Advent2019.Intcode.Execute (decodeInstruction)
+import qualified Text.Parsec (parse)
+import Advent2019.Input (getProblemInputAsByteString)
+import Advent2019.Intcode (TapeSymbol, ParameterMode, Machine)
+import Advent2019.Intcode.Parse (program)
+import Advent2019.Intcode.Machine (newMachine)
+import Advent2019.Intcode.Execute (decodeInstruction, runMachine)
+import Advent2019.Day19 (pulledByTractorBeam)
 
 import Criterion.Main
 
@@ -23,10 +28,21 @@ decode3Modes inst = (opcode, mode0, mode1, mode2)
   where
     (opcode, [mode0,mode1,mode2]) = decodeInstruction inst
 
-main = defaultMain [
-  bgroup "decodeInstruction" [ bench "zero modes"  $ whnf decodeNoModes 01
+setupEnv :: IO ([TapeSymbol] -> Machine)
+setupEnv = do
+  problemInput <- getProblemInputAsByteString 19
+  let parseResult = Text.Parsec.parse program "" problemInput
+  case parseResult of
+    Left err -> error . show $ err
+    Right program -> pure $ newMachine program
+
+main = defaultMain
+  [ bgroup "decodeInstruction" [ bench "zero modes"  $ whnf decodeNoModes 01
                              , bench "one mode"    $ whnf decode1Mode 101
                              , bench "two modes"   $ whnf decode2Modes 2101
                              , bench "three modes" $ whnf decode3Modes 10201
                              ]
+  , env setupEnv $ \machineFactory -> bgroup "pulledByTractorBeam"
+    [ bench "origin" $ whnf (pulledByTractorBeam machineFactory) (0, 0)
+    ]
   ]

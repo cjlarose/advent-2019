@@ -1,5 +1,6 @@
 module Advent2019.Day19
   ( solve
+  , pulledByTractorBeam
   ) where
 
 import Data.Set (Set)
