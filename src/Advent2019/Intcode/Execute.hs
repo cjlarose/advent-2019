@@ -5,7 +5,7 @@ module Advent2019.Intcode.Execute
   , decodeInstruction
   ) where
 
-import Control.Monad.RWS (evalRWS)
+import Control.Monad.RWS.Strict (evalRWS)
 import Data.List (iterate')
 
 import Advent2019.Intcode (TapeSymbol, IntcodeCompute, MachineState(..), ParameterMode(..))

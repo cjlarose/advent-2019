@@ -8,7 +8,7 @@ module Advent2019.Intcode
   ) where
 
 import Data.Int (Int64)
-import Control.Monad.RWS (RWS)
+import Control.Monad.RWS.Strict (RWS)
 import Data.Vector.Unboxed (Vector)
 
 data MachineState = Running | Terminated

@@ -5,7 +5,7 @@ module Advent2019.Day19
 
 import Data.Set (Set)
 import qualified Data.Set as Set
-import Control.Monad.RWS (evalRWS)
+import Control.Monad.RWS.Strict (evalRWS)
 
 import Advent2019.Input (getProblemInputAsByteString, withSuccessfulParse)
 import Advent2019.Intcode (TapeSymbol)
