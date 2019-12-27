@@ -8,7 +8,8 @@ module Advent2019.Intcode
   ) where
 
 import Data.Int (Int64)
-import Control.Monad.RWS (RWS)
+import Control.Monad.State (State)
+import Control.Monad.Writer (WriterT)
 import Data.Vector.Unboxed (Vector)
 
 data MachineState = Running | Terminated
@@ -19,7 +20,7 @@ data Machine = Machine
   , memory :: Vector TapeSymbol
   , input :: [TapeSymbol]
   , state :: MachineState }
-type IntcodeCompute = RWS () [TapeSymbol] Machine
+type IntcodeCompute = WriterT [TapeSymbol] (State Machine)
 
 data ParameterMode = PositionMode | ImmediateMode | RelativeMode deriving (Enum)
 data ParameterType = ValueParameter | AddressParameter

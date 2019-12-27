@@ -6,7 +6,8 @@ module Advent2019.Intcode.Execute
   , decodeInstruction
   ) where
 
-import Control.Monad.RWS (evalRWS)
+import Control.Monad.Writer (runWriterT)
+import Control.Monad.State (evalState)
 import Data.List (iterate')
 
 import Advent2019.Intcode (Machine, TapeSymbol, IntcodeCompute, MachineState(..), ParameterMode(..))
@@ -60,4 +61,4 @@ runMachineWithInput :: [TapeSymbol] -> [TapeSymbol] -> [TapeSymbol]
 runMachineWithInput program input = snd $ withMachine program input runMachine
 
 evalMachine :: IntcodeCompute a -> Machine -> (a, [TapeSymbol])
-evalMachine action = evalRWS action ()
+evalMachine action = evalState (runWriterT action)
