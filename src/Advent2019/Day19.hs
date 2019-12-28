@@ -1,7 +1,7 @@
 module Advent2019.Day19
   ( solve
   , pulledByTractorBeam
-  , nearPoints
+  , distance
   ) where
 
 import Data.Set (Set)
@@ -20,20 +20,22 @@ pulledByTractorBeam machineFactory (x, y) = (1 ==) . head . snd . evalMachine ru
     machine :: Machine
     machine = machineFactory [fromIntegral x, fromIntegral y]
 
+distance :: (Floating a1, Integral a2, Integral a3, Integral a4, Integral a5) => (a3, a5) -> (a2, a4) -> a1
+distance (x0, y0) (x1, y1) = sqrt $ (fromIntegral x1 - fromIntegral x0) ^ 2 + (fromIntegral y1 - fromIntegral y0) ^ 2
+
 norm :: (Floating a1, Integral a2, Integral a3) => (a2, a3) -> a1
-norm (x0, y0) = sqrt $ fromIntegral x0 ^ 2 + fromIntegral y0 ^ 2
+norm = distance (0, 0)
 
 nearPoints :: (Int, Int) -> [(Int, Int)]
 nearPoints (x0, y0) = search Set.empty $ Set.singleton (0, (x0, y0))
   where
-    distance (x1, y1) = sqrt $ (fromIntegral x1 - fromIntegral x0) ^ 2 + (fromIntegral y1 - fromIntegral y0) ^ 2
     search visited queue = if notYetVisited then minCoord : morePoints else morePoints
       where
         minItem = Set.findMin queue
         (_, minCoord) = minItem
         (x, y) = minCoord
         notYetVisited = not $ minCoord `Set.member` visited
-        neighbors = Set.fromList $ map (\p -> (distance p, p)) [(x + 1, y), (x, y + 1)]
+        neighbors = Set.fromList $ map (\p -> (distance (x0, y0) p, p)) [(x + 1, y), (x, y + 1)]
         newQueue = Set.union neighbors (Set.delete minItem queue)
         morePoints = search (Set.insert minCoord visited) newQueue
 
