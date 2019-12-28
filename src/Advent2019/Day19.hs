@@ -42,13 +42,13 @@ nearPoints (x0, y0) = search Set.empty $ Set.singleton (0, (x0, y0))
 affectedPoints :: ([TapeSymbol] -> Machine) -> [(Int, Int)]
 affectedPoints machineFactory = (0, 0) : search Set.empty (0, 0)
   where
-    search visited p = (nearestNeighbor : friends) ++ search newVisited nearestNeighbor
+    search visited p = nearestNeighborAndFriends ++ search newVisited nearestNeighbor
       where
         nearestNeighbor = head . filter (\n -> not (n `Set.member` visited) && pulledByTractorBeam machineFactory n) . tail . nearPoints $ p
         (x, y) = nearestNeighbor
         rightBound = searchFrom (\x1 -> not $ pulledByTractorBeam machineFactory (fromIntegral x1, y)) $ fromIntegral x
-        friends = [(x1, y) | x1 <- [x + 1..fromIntegral rightBound - 1]]
-        newVisited = Set.union visited . Set.fromList $ nearestNeighbor : friends
+        nearestNeighborAndFriends = [(x1, y) | x1 <- [x..fromIntegral rightBound - 1]]
+        newVisited = Set.union visited . Set.fromList $ nearestNeighborAndFriends
 
 santasShip :: ([TapeSymbol] -> Machine) -> (Int, Int)
 santasShip machineFactory = search (affectedPoints machineFactory) Set.empty
