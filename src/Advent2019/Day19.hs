@@ -6,6 +6,7 @@ module Advent2019.Day19
 
 import Data.Set (Set)
 import qualified Data.Set as Set
+import Numeric.Search.Integer (searchFrom)
 
 import Advent2019.Input (getProblemInputAsByteString, withSuccessfulParse)
 import Advent2019.Intcode (TapeSymbol, Machine)
@@ -43,7 +44,8 @@ affectedPoints machineFactory = (0, 0) : search Set.empty (0, 0)
       where
         nearestNeighbor = head . filter (\n -> not (n `Set.member` visited) && pulledByTractorBeam machineFactory n) . tail . nearPoints $ p
         (x, y) = nearestNeighbor
-        friends = takeWhile (pulledByTractorBeam machineFactory) [(x1, y) | x1 <- [x + 1..]]
+        rightBound = searchFrom (\x1 -> not $ pulledByTractorBeam machineFactory (fromIntegral x1, y)) $ fromIntegral x
+        friends = [(x1, y) | x1 <- [x + 1..fromIntegral rightBound - 1]]
         newVisited = Set.union visited . Set.fromList $ nearestNeighbor : friends
 
 santasShip :: ([TapeSymbol] -> Machine) -> (Int, Int)
