@@ -46,17 +46,17 @@ affectedPoints machineFactory = (0, 0) : search Set.empty (0, 0)
         friends = takeWhile (pulledByTractorBeam machineFactory) [(x1, y) | x1 <- [x + 1..]]
         newVisited = Set.union visited . Set.fromList $ nearestNeighbor : friends
 
--- santasShip :: ([TapeSymbol] -> Machine) -> (TapeSymbol, TapeSymbol)
--- santasShip machineFactory = search (affectedPoints machineFactory) Set.empty
---   where
---     search (p:ps) visited = if bottomRightOfShip
---                             then topLeftOfShip
---                             else search ps $ Set.insert p visited
---       where
---         (x, y) = p
---         seen p0 = Set.member p0 visited
---         bottomRightOfShip = seen (x - 50, y) && seen (x, y - 50)
---         topLeftOfShip = (x - 50, y - 50)
+santasShip :: ([TapeSymbol] -> Machine) -> (Int, Int)
+santasShip machineFactory = search (affectedPoints machineFactory) Set.empty
+  where
+    search (p:ps) visited = if bottomRightOfShip
+                            then topLeftOfShip
+                            else search ps $ Set.insert p visited
+      where
+        (x, y) = p
+        seen p0 = Set.member p0 visited
+        bottomRightOfShip = seen (x - 99, y) && seen (x, y - 99)
+        topLeftOfShip = (x - 99, y - 99)
 
 printResults :: [TapeSymbol] -> (String, String)
 printResults program = (part1, part2)
@@ -64,9 +64,8 @@ printResults program = (part1, part2)
     machineFactory = newMachine program
     closePoints = filter (\(x, y) -> x < 50 && y < 50) . takeWhile (\p -> norm p <= norm (49, 49)) . affectedPoints $ machineFactory
     part1 = show . length $ closePoints
-    -- (x, y) = santasShip machineFactory
-    -- part2 = show $ x * 10000 + y
-    part2 = "not yet implemented"
+    (x, y) = santasShip machineFactory
+    part2 = show $ x * 10000 + y
 
 solve :: IO (Either String (String, String))
 solve = withSuccessfulParse program printResults <$> getProblemInputAsByteString 19
