@@ -27,13 +27,8 @@ parseChars = concat . zipWith parseRow [0..]
     parseRow :: Int -> String -> [((Int, Int), Char)]
     parseRow i = zipWith (\j col -> ((i, j), col)) [0..]
 
-parseScaffold :: [String] -> Set.Set (Int, Int)
-parseScaffold = Set.unions . zipWith parseRow [0..]
-  where
-    parseRow :: Int -> String -> Set.Set (Int, Int)
-    parseRow i = foldr (\(j, col) acc -> if col == '#'
-                                         then Set.insert (i, j) acc
-                                         else acc) Set.empty . zip [0..]
+parseScaffold :: [((Int, Int), Char)] -> Set.Set (Int, Int)
+parseScaffold = Set.fromList . map fst . filter (\(_, c) -> c == '#')
 
 parseVacuum :: [((Int, Int), Char)] -> Vacuum
 parseVacuum xs = Vacuum position direction
@@ -53,7 +48,7 @@ newScene ascii = Scene n m scaffold vacuum
     n = length rows
     m = length . head $ rows
     content = parseChars rows
-    scaffold = parseScaffold rows
+    scaffold = parseScaffold content
     vacuum = parseVacuum content
 
 scaffoldIntersections :: Scene -> Set.Set (Int, Int)
