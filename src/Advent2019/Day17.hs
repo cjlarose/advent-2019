@@ -18,6 +18,8 @@ data Scene = Scene { n :: Int
                    , scaffold :: Set.Set (Int, Int)
                    , vacuum :: Vacuum } deriving Show
 
+data Turn = R | L deriving Show
+
 parseAsciiOutput :: [TapeSymbol] -> String
 parseAsciiOutput = map (toEnum . fromIntegral)
 
@@ -62,6 +64,31 @@ scaffoldIntersections scene = Set.filter isIntersection . scaffold $ scene
 
 sumOfAlignmentParameters :: Set.Set (Int, Int) -> Int
 sumOfAlignmentParameters = Set.foldr (\(i, j) acc -> acc + i * j) 0
+
+walkInDirection :: Scene -> (Int, Int) -> (Int, Int) -> [(Int, Int)]
+walkInDirection scene start (di, dj) = takeWhile hasScaffold . tail $ steps
+  where
+    steps = iterate (\(i, j) -> (i + di, j + dj)) start
+    hasScaffold p = p `Set.member` scaffold scene
+
+getPath :: Scene -> [(Turn, Int)]
+getPath scene = if done
+                then []
+                else (turn, displacement) : getPath newScene
+  where
+    rotateLeft (i, j) = (-j, i)
+    rotateRight (i, j) = (j, -i)
+    oldDirection = direction . vacuum $ scene
+    rightDirection = rotateRight oldDirection
+    leftDirection = rotateLeft oldDirection
+    rightWalk = walkInDirection scene (position . vacuum $ scene) rightDirection
+    leftWalk = walkInDirection scene (position . vacuum $ scene) leftDirection
+    done = null rightWalk && null leftWalk
+    (turn, walk, newDirection) | null rightWalk = (L, leftWalk, leftDirection)
+                               | otherwise = (R, rightWalk, rightDirection)
+    displacement = length walk
+    newVaccum = Vacuum (last walk) newDirection
+    newScene = scene { vacuum = newVaccum }
 
 printResults :: [TapeSymbol] -> (String, String)
 printResults program = (part1, part2)
