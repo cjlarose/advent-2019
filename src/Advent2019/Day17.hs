@@ -36,9 +36,9 @@ parseVacuum xs = Vacuum position direction
     isVaccum (_, c) = c == '^' || c == '>' || c == 'v' || c == '<'
     Just (position, vacChar) = find isVaccum xs
     direction = case vacChar of
-                  '^' -> (1, 0)
+                  '^' -> (-1, 0)
                   '>' -> (0, 1)
-                  'v' -> (-1, 0)
+                  'v' -> (1, 0)
                   '<' -> (0, -1)
 
 newScene :: String -> Scene
